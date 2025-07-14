@@ -1,12 +1,14 @@
-// Import necessary components and functions from react-router-dom.
-
 import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
 } from "react-router-dom";
+
 import { Layout } from "./pages/Layout.jsx";
 import { Home } from "./pages/Home.jsx";
+import { Login } from "./pages/Login.jsx";
+import { SignUp } from "./pages/SignUp.jsx";
+import { UserSettings } from "./pages/UserSettings.jsx";
 import { ContactList } from "./pages/ContactList.jsx";
 import { AddContact } from "./pages/AddContact.jsx";
 import { EditContact } from "./pages/EditContact.jsx";
@@ -30,6 +32,9 @@ export const router = createBrowserRouter(
 
       {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
       <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/user-settings" element={<UserSettings />} />
       <Route path="/contacts" element={<ContactList />} />
       <Route path="/contacts/add-contact" element={<AddContact />} />
       <Route path="/contacts/edit-contact" element={<EditContact />} />

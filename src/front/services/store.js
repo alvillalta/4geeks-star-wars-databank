@@ -8,13 +8,20 @@ export const initialStore = () => {
     planetDetails: {},
     starships: [],
     starshipDetails: {},
-    favorites: []
+    favorites: [],
+    login: {
+      token: "",
+      isLogged: false
+    }
   };
 };
 
 export default function storeReducer(store, action = {}) {
   switch (action.type) {
-    
+
+    case "LOGIN":
+      return { ...store, login: action.payload };
+      
     case "GET-AGENDA":
       return { ...store, contacts: action.payload };
 
