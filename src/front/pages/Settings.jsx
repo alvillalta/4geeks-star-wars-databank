@@ -1,0 +1,64 @@
+import React, { useState } from "react"
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import { useNavigate } from "react-router-dom";
+import { modifyUser } from "../services/users.js"
+
+
+export const Settings = () => {
+    const navigate = useNavigate();
+    const { store, dispatch } = useGlobalReducer();
+    const user = store.currentUser
+
+    const [firstName, setFirstName] = useState(user.first_name);
+    const [lastName, setLastName] = useState(user.last_name);
+
+    const handleFirstName = event => setFirstName(event.target.value);
+    const handleLastName = event => setLastName(event.target.value);
+
+    const handleSubmitSignUp = async (event) => {
+        event.preventDefault();
+        const id = user.id
+        const userToPut = {
+            "first_name": firstName,
+            "last_name": lastName
+        };
+        const userSettings = await modifyUser(id, userToPut);
+        dispatch({
+            type: "CURRENT-USER",
+            payload: userSettings.results
+        });
+        navigate("/");
+    }
+
+    const handleCancel = () => {
+        navigate("/");
+    }
+
+    return (
+        <div className="d-flex justify-content-center my-4">
+            <div className="col-10 col-md-6 col-lg-4 rounded-4 shadow">
+                <div className="d-flex align-items-end justify-content-between p-5 pb-4 border-bottom-0">
+                    <h1 className="fw-bold mb-0 fs-2">Settings</h1>
+                    <button onClick={handleCancel} type="button" className="border-0 bg-transparent text-dark">
+                        <i className="fa-solid fa-xmark fa-xl"></i>
+                    </button>
+                </div>
+                <div className="p-5 pt-0">
+                    <form onSubmit={handleSubmitSignUp}>
+                        <div className="mb-4">
+                            <label htmlFor="signUpFirstName" className="mb-2">First Name</label>
+                            <input type="text" className="form-control rounded-3" id="signUpFirstName" placeholder="Your first name"
+                                value={firstName} onChange={handleFirstName} />
+                        </div>
+                        <div className="mb-4">
+                            <label htmlFor="signUpLastName" className="mb-2">Last Name</label>
+                            <input type="text" className="form-control rounded-3" id="signUpLastName" placeholder="Your last name"
+                                value={lastName} onChange={handleLastName} />
+                        </div>
+                        <button className="w-100 my-2 btn btn-lg rounded-3 btn-dark" type="submit">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+}; 

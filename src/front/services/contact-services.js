@@ -8,9 +8,11 @@ const postUser = async () => {
     const response = await fetch(uri, options);
     if (!response.ok) {
       console.log(response.status, " error");
+      return [];
     }
   } catch {
     console.error("Error creating a user");
+    return [];
   }
 };
 

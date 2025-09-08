@@ -1,0 +1,10 @@
+.css-card-image {
+    object-fit: cover;
+    object-position: top;
+    height: 200px;
+}
+
+.css-card-image-details {
+    object-fit: cover;
+    width: 100%;
+}

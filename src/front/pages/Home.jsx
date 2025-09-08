@@ -1,5 +1,4 @@
-import React, { useEffect } from "react"
-import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import React from "react"
 
 import starWarsDisplay from "../assets/star-wars-display.jpg";
 

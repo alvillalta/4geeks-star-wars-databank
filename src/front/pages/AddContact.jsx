@@ -40,11 +40,11 @@ export const AddContact = () => {
     }
 
     return (
-        <div className="mt-5">
+        <div className="my-4">
             <div className="container d-flex justify-content-center">
                 <div className="col-8 d-flex justify-content-between">
                     <h3>Add a new contact</h3>
-                    <Link to="/contacts">
+                    <Link to="/contacts" className="text-dark">
                         <span>Back to Contacts</span>
                     </Link>
                 </div>
@@ -73,8 +73,8 @@ export const AddContact = () => {
                                 value={address} onChange={handleAddress} />
                         </div>
                         <div className="py-3 g-3">
-                            <button type="submit" className="btn btn-primary mx-3">Submit</button>
-                            <button onClick={handleCancel} type="button" className="btn btn-primary bg-secondary">Cancel</button>
+                            <button type="submit" className="btn btn-dark mx-3">Submit</button>
+                            <button onClick={handleCancel} type="button" className="btn btn-secondary">Cancel</button>
                         </div>
                     </form>
                 </div>

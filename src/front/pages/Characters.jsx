@@ -50,10 +50,11 @@ export const Characters = () => {
             dispatch({
                 type: "REMOVE-FAVORITES",
                 payload: { name: item.name, like: false, id: item.uid }
-        });}
+            });
+        }
     }
 
-
+    
     //  Render
     return (
         <div className="container text-center my-4">
@@ -66,21 +67,17 @@ export const Characters = () => {
                     return (
                         <div className="col" key={item.uid}>
                             <div className="card mb-3">
-                                <div className="row g-0">
-                                    <div className="col-md-4 d-flex justify-content-center">
-                                        <img src={`https://raw.githubusercontent.com/tbone849/star-wars-guide/refs/heads/master/build/assets/img/characters/${item.uid}.jpg`}
-                                            onError={handleImageError} className="img-fluid rounded-start" />
-                                    </div>
-                                </div>
-                                <div className="col-md-8">
-                                    <div className="card-body">
+                                <img src={`https://raw.githubusercontent.com/tbone849/star-wars-guide/refs/heads/master/build/assets/img/characters/${item.uid}.jpg`}
+                                    onError={handleImageError} className="css-card-image card-img-top"/>
+                                <div className="col-md-10 d-flex align-items-start">
+                                    <div className="card-body text-start">
                                         <h5 className="card-title">{item.name}</h5>
-                                        <div className="d-flex justify-content-start gap-2">
-                                            <button onClick={() => handleCharacterDetails(item)} className="btn btn-primary">
+                                        <div className="d-flex justify-content-start gap-3">
+                                            <button onClick={() => handleCharacterDetails(item)} className="btn btn-dark">
                                                 Details
                                             </button>
-                                            <button onClick={() => handleFavorites(item)} type="button" className="btn btn-warning">
-                                                <i className={`fa-${favoriteTrue ? "solid" : "regular"} fa-heart`}></i></button> 
+                                            <button onClick={() => handleFavorites(item)} type="button" className="p-0 border-0 bg-transparent">
+                                                <i className={`fa-${favoriteTrue ? "solid" : "regular"} fa-xl fa-heart`}></i></button>
                                         </div>
                                     </div>
                                 </div>
