@@ -48,10 +48,7 @@ def signup():
               "followers": [],
               "following": [],
               "posts": [],
-              "comments": [],
-              "character_favorites": [],
-              "planet_favorites": [],
-              "starship_favorites": []}
+              "comments": []}
 
     access_token = create_access_token(
         identity=user.email, additional_claims=claims)
@@ -89,10 +86,7 @@ def login():
               "followers": [row.serialize()["follower_id"] for row in user.following_to] if user.following_to else [],
               "following": [row.serialize()["following_id"] for row in user.follower_to] if user.follower_to else [],
               "posts": [row.serialize()["id"] for row in user.user_posts] if user.user_posts else [],
-              "comments": [row.serialize() for row in user.user_comments] if user.user_comments else [],
-              "character_favorites": [row.character_to.serialize() for row in user.user_character_favorites] if user.user_character_favorites else [],
-              "planet_favorites": [row.planet_to.serialize() for row in user.user_planet_favorites] if user.user_planet_favorites else [],
-              "starship_favorites": [row.starship_to.serialize() for row in user.user_starship_favorites] if user.user_starship_favorites else []}
+              "comments": [row.serialize() for row in user.user_comments] if user.user_comments else []}
 
     access_token = create_access_token(
         identity=email, additional_claims=claims)
