@@ -9,6 +9,7 @@ import { Home } from "./pages/Home.jsx";
 import { Login } from "./pages/Login.jsx";
 import { SignUp } from "./pages/SignUp.jsx";
 import { Settings } from "./pages/Settings.jsx";
+import { Favorites } from "./pages/Favorites.jsx";
 import { ContactList } from "./pages/ContactList.jsx";
 import { AddContact } from "./pages/AddContact.jsx";
 import { EditContact } from "./pages/EditContact.jsx";
@@ -17,7 +18,8 @@ import { CharacterDetails } from "./pages/CharacterDetails.jsx";
 import { Planets } from "./pages/Planets.jsx";
 import { PlanetDetails } from "./pages/PlanetDetails.jsx";
 import { Starships } from "./pages/Starships.jsx";
-import { StarshipDetails } from "./pages/StarshipDetails.jsx";
+
+<Route path="/settings" element={<Settings />} />
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -35,6 +37,7 @@ export const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/favorites" element={<Favorites />} />
       <Route path="/contacts" element={<ContactList />} />
       <Route path="/contacts/add-contact" element={<AddContact />} />
       <Route path="/contacts/edit-contact" element={<EditContact />} />

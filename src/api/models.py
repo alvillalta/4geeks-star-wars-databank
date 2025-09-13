@@ -16,16 +16,24 @@ class Users(db.Model):
     def __repr__(self):
         return f"<User {self.id} - {self.email}>"
 
-    def serialize(self):
+    def serialize_basic(self):
+        return {"id": self.id,
+                "email": self.email,
+                "is_active": self.is_active,
+                "is_admin": self.is_admin,
+                "first_name": self.first_name,
+                "last_name": self.last_name}
+    
+    def serialize_full(self):
         return {"id": self.id,
                 "email": self.email,
                 "is_active": self.is_active,
                 "is_admin": self.is_admin,
                 "first_name": self.first_name,
                 "last_name": self.last_name,
-                "character_favorites": [row.character_to.serialize() for row in self.user_character_favorites],
-                "planet_favorites": [row.planet_to.serialize() for row in self.user_planet_favorites],
-                "starship_favorites": [row.starship_to.serialize() for row in self.user_starship_favorites]}
+                "character_favorites": [row.character_to.serialize_cards() for row in self.user_character_favorites] if self.user_character_favorites else [],
+                "planet_favorites": [row.planet_to.serialize_cards() for row in self.user_planet_favorites] if self.user_planet_favorites else [],
+                "starship_favorites": [row.starship_to.serialize_cards() for row in self.user_starship_favorites] if self.user_starship_favorites else []}
 
 
 class CharacterFavorites(db.Model):

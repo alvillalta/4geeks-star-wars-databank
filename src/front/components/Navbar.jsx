@@ -21,16 +21,30 @@ export const Navbar = () => {
 
 	const handleLogIn = () => {
 		if (store.login.isLogged) {
-			localStorage.removeItem("token");
-			dispatch({
-				type: "LOGIN",
-				payload: { token: "", isLogged: false }
-			});
+			localStorage.clear();
+			dispatch({ type: LOGOUT });
 			navigate("/");
 		} else {
 			navigate("/login");
 		}
 	}
+
+
+	const handleDeleteUser = async (event) => {
+			event.preventDefault();
+			try {
+				const responseStatus = await deleteUser(currentUser.id);
+				if (responseStatus == 204) {
+					dispatch({ type: LOGOUT });
+					navigate("/");
+				}
+			} catch (error) {
+				setFirstName(currentUser.first_name);
+				setLastName(currentUser.last_name);
+				return alert(error.message);
+			}
+		}
+
 
 	const handleSignUp = () => {
 		if (store.login.isLogged) {

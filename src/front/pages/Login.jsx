@@ -1,12 +1,13 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "../services/auth.js"
+import { login } from "../services/auth.js";
+import { getFavorites } from "../services/star-wars-services.js";
 
 
 export const Login = () => {
     const navigate = useNavigate();
-    const { store, dispatch } = useGlobalReducer();
+    const { dispatch } = useGlobalReducer();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -20,22 +21,38 @@ export const Login = () => {
             "email": email,
             "password": password,
         }
-        const userLogged = await login(userToLogin);
-        localStorage.setItem("token", userLogged.access_token);
-        dispatch({
-            type: "LOGIN",
-            payload: { token: userLogged.access_token, isLogged: true }
-        });
-        dispatch({
-            type: "CURRENT-USER",
-            payload: userLogged.results
-        });
-        navigate("/");
+        try {
+            const userLogged = await login(userToLogin);
+            dispatch({
+                type: "LOGIN",
+                payload: { token: userLogged.access_token, isLogged: true }
+            });
+            dispatch({
+                type: "CURRENT-USER",
+                payload: userLogged.results
+            });
+            const favorites = await getFavorites(userLogged.results.id);
+            dispatch({
+                type: "CHARACTER-FAVORITES",
+                payload: favorites.characterFavorites
+            });
+            dispatch({
+                type: "PLANET-FAVORITES",
+                payload: favorites.planetFavorites
+            });
+            dispatch({
+                type: "STARSHIP-FAVORITES",
+                payload: favorites.starshipFavorites
+            });
+            navigate("/");
+        } catch (error) {
+            setEmail("");
+            setPassword("");
+            return alert(error.message);
+        }
     }
 
     const handleCancel = () => {
-        setEmail("");
-        setPassword("");
         navigate("/");
     }
 

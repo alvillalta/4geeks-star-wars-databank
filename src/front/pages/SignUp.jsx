@@ -1,12 +1,12 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import { register } from "../services/auth.js"
+import { signup } from "../services/auth.js"
 
 
 export const SignUp = () => {
     const navigate = useNavigate();
-    const { store, dispatch } = useGlobalReducer();
+    const { dispatch } = useGlobalReducer();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -26,26 +26,29 @@ export const SignUp = () => {
             "first_name": firstName,
             "last_name": lastName
         };
-        const userRegistered = await register(userToPost);
-        localStorage.setItem("token", userRegistered.access_token);
-        dispatch({
-            type: "LOGIN",
-            payload: { token: userRegistered.access_token, isLogged: true }
-        });
-        dispatch({
-            type: "CURRENT-USER",
-            payload: userRegistered.results
-        });
-        navigate("/");
-    }
+        try {
+            const userLogged = await signup(userToPost);
+            dispatch({
+                type: "LOGIN",
+                payload: { token: userLogged.access_token, isLogged: true }
+            });
+            dispatch({
+                type: "CURRENT-USER",
+                payload: userLogged.results
+            });
+            navigate("/");
+        } catch (error) {
+            setEmail("");
+            setPassword("");
+            setFirstName("");
+            setLastName("");
+            return alert(error.message);
+        }
+    };
 
     const handleCancel = () => {
-        setEmail("");
-        setPassword("");
-        setFirstName("");
-        setLastName("");
         navigate("/");
-    }
+    };
 
     return (
         <div className="d-flex justify-content-center my-4">

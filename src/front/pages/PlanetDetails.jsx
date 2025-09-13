@@ -1,39 +1,35 @@
-import React, { useEffect } from "react";
-
-import { Link, useNavigate, useParams } from "react-router-dom";
-
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
-
-import { getPlanetDetails } from "../services/star-wars-services.js";
-
+import { getPlanetDetails, postPlanetFavorite, deletePlanetFavorite } from "../services/star-wars-services.js";
 import starWarsImageError from "../assets/star-wars-image-error.jpg";
 
-
 export const PlanetDetails = () => {
-
     const navigate = useNavigate();
     const { planetId } = useParams();
-
     const { store, dispatch } = useGlobalReducer();
     const planetDetails = store.planetDetails;
-    const favorites = store.favorites;
-    const planetFavoriteId = planetId + 100;
-    const favoriteTrue = favorites.find(favorite => favorite.id === planetFavoriteId && favorite.like === true);
-
+    const planetFavorites = store.planetFavorites;
+    const isPlanetFavorite = planetFavorites.find(favorite => favorite.planet_id === planetId);
 
     useEffect(() => {
-        const getPlanetDetailsInComponent = async () => {
-            const planetDetailsInComponent = await getPlanetDetails(planetId);
+        const initializePlanetDetails = async () => {
+            const planetDetailsGot = await getPlanetDetails(planetId);
             dispatch({
-                type: "GET-PLANET-DETAILS",
-                payload: planetDetailsInComponent
-            })
+                type: "PLANET-DETAILS",
+                payload: planetDetailsGot
+            });
         };
-        getPlanetDetailsInComponent();
+        initializePlanetDetails();
+        return () => {
+            dispatch({ 
+                type: "PLANET-DETAILS", 
+                payload: {} 
+            });
+        };
     }, [])
 
-
-    const handleImageError = (imageError) => {
+    const handleImageError = (event) => {
         event.target.src = starWarsImageError;
     }
 
@@ -41,18 +37,25 @@ export const PlanetDetails = () => {
         navigate("/planets");
     }
 
-    const handleFavorites = () => {
-        const favoriteExists = favorites.find(favorite => favorite.id === planetFavoriteId);
-        if (!favoriteExists) {
-            dispatch({
-                type: "ADD-FAVORITES",
-                payload: { name: planetDetails.name, like: true, id: planetFavoriteId }
-            });
-        } else {
-            dispatch({
-                type: "REMOVE-FAVORITES",
-                payload: { name: planetDetails.name, like: false, id: planetFavoriteId }
-            });
+    const handlePlanetFavorites = async (planetId, isPlanetFavorite) => {
+        try {
+            if (!isPlanetFavorite) {
+                const planetFavorite = await postPlanetFavorite(planetId);
+                dispatch({
+                    type: "POST-PLANET-FAVORITE",
+                    payload: planetFavorite
+                });
+            } else {
+                const responseStatus = await deleteCharacterFavorite(planetId);
+                if (responseStatus == 204) {
+                    dispatch({
+                        type: "DELETE-PLANET-FAVORITE",
+                        payload: planetId
+                    });
+                }
+            } 
+        } catch (error) {
+            return alert(error.message);
         }
     }
 
@@ -68,7 +71,6 @@ export const PlanetDetails = () => {
                         <h2 className="card-title py-3 ps-3">{planetDetails.name}</h2>
                         <ul className="list-group">
                             <li className="list-group-item"><b>Climate:</b>{` ${planetDetails.climate}`}</li>
-                            <li className="list-group-item"><b>Surface water:</b>{` ${planetDetails.surface_water}`}</li>
                             <li className="list-group-item"><b>Diameter:</b>{` ${planetDetails.diameter}`}</li>
                             <li className="list-group-item"><b>Rotation Period:</b>{` ${planetDetails.rotation_period}`}</li>
                             <li className="list-group-item"><b>Terrain:</b>{` ${planetDetails.terrain}`}</li>
@@ -78,9 +80,9 @@ export const PlanetDetails = () => {
                         </ul>
                         <div className="d-flex justify-content-start gap-3 py-3 ps-3">
                             <button onClick={handleBack} className="btn btn-secondary">Back</button>
-                            <button onClick={handleFavorites}
+                            <button onClick={() => handlePlanetFavorites(planetId, isPlanetFavorite)}
                                 type="button" className="p-0 border-0 bg-transparent">
-                                <i className={`fa-${favoriteTrue ? "solid" : "regular"} fa-xl fa-heart`}></i>
+                                <i className={`fa-${isPlanetFavorite ? "solid" : "regular"} fa-xl fa-heart`}></i>
                             </button>
                         </div>
                     </div>

@@ -1,39 +1,35 @@
-import React, { useEffect } from "react";
-
-import { Link, useNavigate, useParams } from "react-router-dom";
-
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
-
-import { getStarshipDetails } from "../services/star-wars-services.js";
-
+import { getStarshipDetails, postStarshipFavorite, deleteStarshipFavorite } from "../services/star-wars-services.js";
 import starWarsImageError from "../assets/star-wars-image-error.jpg";
 
-
 export const StarshipDetails = () => {
-
     const navigate = useNavigate();
     const { starshipId } = useParams();
-
     const { store, dispatch } = useGlobalReducer();
     const starshipDetails = store.starshipDetails;
-    const favorites = store.favorites;
-    const starshipFavoriteId = starshipId + 200;
-    const favoriteTrue = favorites.find(favorite => favorite.id === starshipFavoriteId && favorite.like === true);
-
+    const starshipFavorites = store.starshipFavorites;
+    const isStarshipFavorite = starshipFavorites.find(favorite => favorite.starship_id === starshipId);
 
     useEffect(() => {
-        const getStarshipDetailsInComponent = async () => {
-            const starshipDetailsInComponent = await getStarshipDetails(starshipId);
+        const initializeStarshipDetails = async () => {
+            const starshipDetailsGot = await getStarshipDetails(starshipId);
             dispatch({
-                type: "GET-STARSHIP-DETAILS",
-                payload: starshipDetailsInComponent
-            })
+                type: "STARSHIP-DETAILS",
+                payload: starshipDetailsGot
+            });
         };
-        getStarshipDetailsInComponent();
+        initializeStarshipDetails();
+        return () => {
+            dispatch({ 
+                type: "STARSHIP-DETAILS", 
+                payload: {} 
+            });
+        };
     }, [])
 
-
-    const handleImageError = (imageError) => {
+    const handleImageError = (event) => {
         event.target.src = starWarsImageError;
     }
 
@@ -41,18 +37,25 @@ export const StarshipDetails = () => {
         navigate("/starships");
     }
 
-    const handleFavorites = () => {
-        const favoriteExists = favorites.find(favorite => favorite.id === starshipFavoriteId);
-        if (!favoriteExists) {
-            dispatch({
-                type: "ADD-FAVORITES",
-                payload: { name: starshipDetails.name, like: true, id: starshipFavoriteId }
-            });
-        } else {
-            dispatch({
-                type: "REMOVE-FAVORITES",
-                payload: { name: starshipDetails.name, like: false, id: starshipFavoriteId }
-            });
+    const handleStarshipFavorites = async (starshipId, isStarshipFavorite) => {
+        try {
+            if (!isStarshipFavorite) {
+                const starshipFavorite = await postStarshipFavorite(starshipId);
+                dispatch({
+                    type: "POST-STARSHIP-FAVORITE",
+                    payload: starshipFavorite
+                });
+            } else {
+                const responseStatus = await deleteStarshipFavorite(starshipId);
+                if (responseStatus == 204) {
+                    dispatch({
+                        type: "DELETE-STARSHIP-FAVORITE",
+                        payload: starshipId
+                    });
+                }
+            } 
+        } catch (error) {
+            return alert(error.message);
         }
     }
 
@@ -81,9 +84,9 @@ export const StarshipDetails = () => {
                         </ul>
                         <div className="d-flex justify-content-start gap-3 py-3 ps-3">
                             <button onClick={handleBack} className="btn btn-secondary ">Back</button>
-                            <button onClick={handleFavorites}
+                            <button onClick={handleStarshipFavorites(starshipId, isStarshipFavorite)}
                                 type="button" className="p-0 border-0 bg-transparent">
-                                <i className={`fa-${favoriteTrue ? "solid" : "regular"} fa-xl fa-heart`}></i>
+                                <i className={`fa-${isStarshipFavorite ? "solid" : "regular"} fa-xl fa-heart`}></i>
                             </button>
                         </div>
                     </div>
