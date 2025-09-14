@@ -54,7 +54,7 @@ export const ContactList = () => {
             <div className="container">
                 <div className="row justify-content-center mb-3">
                     <div className="col-8 d-flex justify-content-between align-items-center">
-                        <h3 className="mb-">Contacts</h3>
+                        <h3 className="mb-3">Contacts</h3>
                         <Link to="/contacts/add-contact" className="text-dark">
                             <span>Add Contact</span>
                         </Link>

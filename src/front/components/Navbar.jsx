@@ -1,31 +1,19 @@
 import { Link, useNavigate } from "react-router-dom";
-
 import useGlobalReducer from "../hooks/useGlobalReducer";
-
 import starWarsLogo from "../assets/star-wars-logo.png";
 
 export const Navbar = () => {
-
-	//  Declatations
 	const navigate = useNavigate();
 	const { store, dispatch } = useGlobalReducer();
-	const favorites = store.favorites
-
-	//  Handlers
-	const handleDeleteFavorites = (item) => {
-		dispatch({
-			type: "REMOVE-FAVORITES",
-			payload: { name: item.name, like: false, id: item.id }
-		});
-	}
+	const characterFavorites = store.characterFavorites;
+	const planetFavorites = store.planetFavorites;
+	const starshipFavorites = store.starshipFavorites;
+	const favoritesLength = characterFavorites.length + planetFavorites.length + starshipFavorites.length;
 
 	const handleLogIn = () => {
 		if (store.login.isLogged) {
-			localStorage.removeItem("token");
-			dispatch({
-				type: "LOGIN",
-				payload: { token: "", isLogged: false }
-			});
+			localStorage.clear();
+			dispatch({ type: "LOGOUT" }); 
 			navigate("/");
 		} else {
 			navigate("/login");
@@ -40,7 +28,12 @@ export const Navbar = () => {
 		}
 	}
 
-	//  Render
+	const handleFavorites = () => {
+		if (favoritesLength > 0) {
+			navigate("/favorites");
+		}
+	}
+
 	return (
 		<nav className="navbar navbar-light bg-light">
 			<div className="container my-2">
@@ -67,46 +60,21 @@ export const Navbar = () => {
 						<Link to="/contacts" className="mb-3 mb-lg-0 text-decoration-none">
 							<span className="navbar-brand mb-0 me-0 me-lg-3 h1">Contacts</span>
 						</Link>
-						<div className="dropdown">
-							<button className={`btn btn-${favorites.length > 0 ? "dark dropdown-toggle" : "secondary"} position-relative`} type="button" data-bs-toggle="dropdown" aria-expanded="false">
-								{favorites.length > 0 ?
-									<span>
-										Favorites
-										<span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-											{favorites.length}
-										</span>
+						<button onClick={handleFavorites} type="button" 
+							className={`btn btn-${favoritesLength > 0 ? "dark" : "secondary"} position-relative`}>
+							{favoritesLength > 0 ?
+								<span>
+									Favorites
+									<span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+										{favoritesLength}
 									</span>
-									:
-									<span>
-										Favorites
-									</span>
-								}
-							</button>
-							{favorites.length > 0 ?
-								<div className="dropdown-menu bg-light">
-									{favorites.map((item, index) => {
-										return (
-											<div key={item.id}>
-												<div className="d-flex justify-content-between p-2 gap-2">
-													<span className="ps-2">
-														{item.name}
-													</span>
-													<button onClick={() => handleDeleteFavorites(item)} type="button" className="pe-2 py-0 border-0 bg-transparent">
-														<i className="fa-solid fa-lg fa-xmark"></i>
-													</button>
-												</div>
-												{index == favorites.length -1 ? 
-												<hr className="d-none"></hr>
-												:
-												<hr></hr>}
-											</div>
-										)
-									})}
-								</div>
+								</span>
 								:
-								<div className="dropdown-menu d-none"></div>
+								<span>
+									Favorites
+								</span>
 							}
-						</div>
+						</button>
 					</div>
 				</div>
 				<div className="col-12 col-lg-4">

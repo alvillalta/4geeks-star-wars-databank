@@ -1,37 +1,36 @@
-import React, { useEffect } from "react";
-
-import { Link, useNavigate, useParams } from "react-router-dom";
-
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
-
-import { getCharacterDetails } from "../services/star-wars-services.js";
-
+import { getCharacterDetails, postCharacterFavorite, deleteCharacterFavorite } from "../services/star-wars-services.js";
 import starWarsImageError from "../assets/star-wars-image-error.jpg";
 
 
 export const CharacterDetails = () => {
-
     const navigate = useNavigate();
-    const { characterId } = useParams();
-
+    const { characterId } = useParams();;
     const { store, dispatch } = useGlobalReducer();
     const characterDetails = store.characterDetails;
-    const favorites = store.favorites;
-    const favoriteTrue = favorites.find(favorite => favorite.id === characterId && favorite.like === true);
+    const characterFavorites = store.characterFavorites;
+    const isCharacterFavorite = characterFavorites.find(favorite => favorite.character_id === Number(characterId));
 
     useEffect(() => {
-        const getCharacterDetailsInComponent = async () => {
-            const characterDetailsInComponent = await getCharacterDetails(characterId);
+        const initializeCharacterDetails = async () => {
+            const characterDetailsGot = await getCharacterDetails(characterId);
             dispatch({
-                type: "GET-CHARACTER-DETAILS",
-                payload: characterDetailsInComponent
+                type: "CHARACTER-DETAILS",
+                payload: characterDetailsGot
             });
         };
-        getCharacterDetailsInComponent();
+        initializeCharacterDetails();
+        return () => {
+            dispatch({ 
+                type: "CHARACTER-DETAILS", 
+                payload: {} 
+            });
+        };
     }, [])
 
-
-    const handleImageError = (imageError) => {
+    const handleImageError = (event) => {
         event.target.src = starWarsImageError;
     }
 
@@ -39,18 +38,25 @@ export const CharacterDetails = () => {
         navigate("/characters");
     }
 
-    const handleFavorites = (characterId) => {
-        const favoriteExists = favorites.find(favorite => favorite.id === characterId);
-        if (!favoriteExists) {
-            dispatch({
-                type: "ADD-FAVORITES",
-                payload: { name: characterDetails.name, like: true, id: characterId }
-            });
-        } else {
-            dispatch({
-                type: "REMOVE-FAVORITES",
-                payload: { name: characterDetails.name, like: false, id: characterId }
-            });
+    const handleCharacterFavorites = async (characterId, isCharacterFavorite) => {
+        try {
+            if (!isCharacterFavorite) {
+                const characterFavorite = await postCharacterFavorite(characterId);
+                dispatch({
+                    type: "POST-CHARACTER-FAVORITE",
+                    payload: characterFavorite
+                });
+            } else {
+                const responseStatus = await deleteCharacterFavorite(characterId);
+                if (responseStatus == 204) {
+                    dispatch({
+                        type: "DELETE-CHARACTER-FAVORITE",
+                        payload: characterId
+                    });
+                }
+            } 
+        } catch (error) {
+            return alert(error.message);
         }
     }
 
@@ -71,14 +77,13 @@ export const CharacterDetails = () => {
                             <li className="list-group-item"><b>Height:</b>{` ${characterDetails.height}`}</li>
                             <li className="list-group-item"><b>Eye color:</b>{` ${characterDetails.eye_color}`}</li>
                             <li className="list-group-item"><b>Mass:</b>{` ${characterDetails.mass}`}</li>
-                            {/* <li className="list-group-item"><b>Homeworld:</b>{` ${characterDetails.homeworld}`}</li> */}
                             <li className="list-group-item"><b>Birth year:</b>{` ${characterDetails.birth_year}`}</li>
                         </ul>
                         <div className="d-flex justify-content-start gap-3 py-3 ps-3">
                             <button onClick={handleBack} className="btn btn-secondary">Back</button>
-                            <button onClick={() => handleFavorites(characterId)}
+                            <button onClick={() => handleCharacterFavorites(characterId, isCharacterFavorite)}
                                 type="button" className="p-0 border-0 bg-transparent">
-                                <i className={`fa-${favoriteTrue ? "solid" : "regular"} fa-xl fa-heart`}></i>
+                                <i className={`fa-${isCharacterFavorite ? "solid" : "regular"} fa-xl fa-heart`}></i>
                             </button>
                         </div>
                     </div>

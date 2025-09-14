@@ -1,33 +1,53 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { useNavigate } from "react-router-dom";
-import { modifyUser } from "../services/users.js"
+import { putUser, deleteUser } from "../services/star-wars-services.js";
 
 
 export const Settings = () => {
     const navigate = useNavigate();
     const { store, dispatch } = useGlobalReducer();
-    const user = store.currentUser
+    const currentUser = store.currentUser
 
-    const [firstName, setFirstName] = useState(user.first_name);
-    const [lastName, setLastName] = useState(user.last_name);
+    const [firstName, setFirstName] = useState(currentUser.first_name);
+    const [lastName, setLastName] = useState(currentUser.last_name);
 
     const handleFirstName = event => setFirstName(event.target.value);
     const handleLastName = event => setLastName(event.target.value);
 
-    const handleSubmitSignUp = async (event) => {
+    const handleSubmitSettings = async (event) => {
         event.preventDefault();
-        const id = user.id
         const userToPut = {
             "first_name": firstName,
             "last_name": lastName
         };
-        const userSettings = await modifyUser(id, userToPut);
-        dispatch({
-            type: "CURRENT-USER",
-            payload: userSettings.results
-        });
-        navigate("/");
+        try {
+            const updatedUser = await putUser(currentUser.id, userToPut);
+            dispatch({
+                type: "CURRENT-USER",
+                payload: updatedUser.results
+            });
+            navigate("/");
+        } catch (error) {
+            setFirstName(currentUser.first_name);
+            setLastName(currentUser.last_name);
+            return alert(error.message);
+        }
+    }
+
+    const handleDeleteUser = async (event) => {
+        event.preventDefault();
+        try {
+            const responseStatus = await deleteUser(currentUser.id);
+            if (responseStatus == 204) {
+                dispatch({ type: LOGOUT });
+                navigate("/");
+            }
+        } catch (error) {
+            setFirstName(currentUser.first_name);
+            setLastName(currentUser.last_name);
+            return alert(error.message);
+        }
     }
 
     const handleCancel = () => {
@@ -44,7 +64,7 @@ export const Settings = () => {
                     </button>
                 </div>
                 <div className="p-5 pt-0">
-                    <form onSubmit={handleSubmitSignUp}>
+                    <form onSubmit={handleSubmitSettings}>
                         <div className="mb-4">
                             <label htmlFor="signUpFirstName" className="mb-2">First Name</label>
                             <input type="text" className="form-control rounded-3" id="signUpFirstName" placeholder="Your first name"
@@ -56,6 +76,7 @@ export const Settings = () => {
                                 value={lastName} onChange={handleLastName} />
                         </div>
                         <button className="w-100 my-2 btn btn-lg rounded-3 btn-dark" type="submit">Save</button>
+                        <button onClick={handleDeleteUser} className="w-100 my-2 btn btn-lg rounded-3 btn-danger" type="button">Delete</button>
                     </form>
                 </div>
             </div>

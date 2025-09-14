@@ -7,6 +7,7 @@ from flask_cors import CORS
 from api.models import db, Users, CharacterFavorites, Characters, PlanetFavorites, Planets, StarshipFavorites, Starships
 import requests
 from sqlalchemy import asc
+from sqlalchemy import and_
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
@@ -25,8 +26,7 @@ def signup():
     user_to_post = request.json
     user = Users()
     user.email = user_to_post.get("email").lower()
-    existing_user = db.session.execute(
-        db.select(Users).where(Users.email == user.email)).scalar()
+    existing_user = db.session.execute(db.select(Users).where(Users.email == user.email)).scalar()
     if existing_user:
         response_body["message"] = f"User {user.email} already exists"
         response_body["results"] = None
@@ -41,18 +41,13 @@ def signup():
 
     claims = {"user_id": user.id,
               "email": user.email,
-              "is_active": user.is_active,
-              "is_admin": user.is_admin,
               "first_name": user.first_name if user.first_name else None,
-              "last_name": user.last_name if user.last_name else None,
-              "character_favorites": [],
-              "planet_favorites": [],
-              "starship_favorites": []}
+              "last_name": user.last_name if user.last_name else None}
 
     access_token = create_access_token(
         identity=user.email, additional_claims=claims)
     response_body["message"] = f"User {user.id} posted successfully"
-    response_body["results"] = user.serialize()
+    response_body["results"] = user.serialize_basic()
     response_body["access_token"] = access_token
     return jsonify(response_body), 201
 
@@ -64,9 +59,9 @@ def login():
     user_to_login = request.json
     email = user_to_login.get("email").lower()
     password = user_to_login.get("password")
-    user = db.session.execute(db.select(Users).where(Users.email == email,
-                                                     Users.password == password,
-                                                     Users.is_active == True)).scalar()
+    user = db.session.execute(db.select(Users).where(and_(Users.email == email,
+                                                          Users.password == password,
+                                                          Users.is_active == True))).scalar()
     if not user:
         response_body["message"] = f"Bad email or password"
         response_body["results"] = None
@@ -78,18 +73,13 @@ def login():
 
     claims = {"user_id": user.id,
               "email": user.email,
-              "is_active": user.is_active,
-              "is_admin": user.is_admin,
               "first_name": user.first_name if user.first_name else None,
-              "last_name": user.last_name if user.last_name else None,
-              "character_favorites": [row.character_to.serialize() for row in user.user_character_favorites] if user.user_character_favorites else [],
-              "planet_favorites": [row.planet_to.serialize() for row in user.user_planet_favorites] if user.user_planet_favorites else [],
-              "starship_favorites": [row.starship_to.serialize() for row in user.user_starship_favorites] if user.user_starship_favorites else []}
+              "last_name": user.last_name if user.last_name else None}
 
     access_token = create_access_token(
         identity=email, additional_claims=claims)
     response_body["message"] = f"User {user.email} logged successfully"
-    response_body["results"] = user.serialize()
+    response_body["results"] = user.serialize_basic()
     response_body["access_token"] = access_token
     return jsonify(response_body), 200
 
@@ -100,17 +90,13 @@ def handle_user(user_id):
     response_body = {}
     claims = get_jwt()
     token_user_id = claims["user_id"]
-    if not token_user_id:
-        response_body["message"] = "Current user not found"
-        response_body["results"] = None
-        return jsonify(response_body), 401
     user_to_handle = db.session.execute(db.select(Users).where(Users.id == user_id)).scalar()
     if not user_to_handle:
         response_body["message"] = f"User {user_id} not found"
         response_body["results"] = None
         return jsonify(response_body), 404
     if request.method == "GET":
-        results = user_to_handle.serialize()
+        results = user_to_handle.serialize_full()
         response_body["message"] = f"User {user_id} got successfully"
         response_body["results"] = results
         return jsonify(response_body), 200
@@ -120,12 +106,12 @@ def handle_user(user_id):
             response_body["results"] = None
             return jsonify(response_body), 403
         data = request.json
-        user_to_handle.email = data.get("email", user_to_handle.email)
         user_to_handle.first_name = data.get("first_name", user_to_handle.first_name)
         user_to_handle.last_name = data.get("last_name", user_to_handle.last_name)
         db.session.commit()
+        results = user_to_handle.serialize_basic()
         response_body["message"] = f"User {user_to_handle.id} put successfully"
-        response_body["results"] = user_to_handle.serialize()
+        response_body["results"] = results
         return jsonify(response_body), 200
     if request.method == "DELETE":
         if token_user_id != user_to_handle.id:
@@ -136,19 +122,13 @@ def handle_user(user_id):
         db.session.commit()
         response_body["message"] = f"User {user_to_handle.id} deleted successfully"
         response_body["results"] = None
-        return jsonify(response_body), 200
+        return jsonify(response_body), 204
 
 
 @api.route("/users/<int:user_id>/favorites", methods=["GET"])
 @jwt_required()
 def handle_favorites(user_id):
     response_body = {}
-    claims = get_jwt()
-    token_user_id = claims["user_id"]
-    if not token_user_id:
-        response_body["message"] = "Current user not found"
-        response_body["results"] = None
-        return jsonify(response_body), 401
     user_to_handle = db.session.execute(db.select(Users).where(Users.id == user_id)).scalar()
     if not user_to_handle:
         response_body["message"] = f"User {user_id} not found"
@@ -160,17 +140,17 @@ def handle_favorites(user_id):
         starship_favorites = db.session.execute(db.select(StarshipFavorites).where(StarshipFavorites.user_id == user_id)).scalars().all()
         if not character_favorites and not planet_favorites and not starship_favorites:
             response_body["message"] = f"User {user_id} has no favorites"
-            response_body["results"] = {"character_favorites": [],
-                                        "planet_favorites": [],
-                                        "starship_favorites": []}
+            response_body["character_favorites"] = []
+            response_body["planet_favorites"] = []
+            response_body["starship_favorites"] = []
             return jsonify(response_body), 200
         character_results = [row.serialize() for row in character_favorites] if character_favorites else []
         planet_results = [row.serialize() for row in planet_favorites] if planet_favorites else []
         starship_results = [row.serialize() for row in starship_favorites] if starship_favorites else []
         response_body["message"] = f"User {user_id} favorites got successfully"
-        response_body["results"] = {"character_favorites": character_results,
-                                    "planet_favorites": planet_results,
-                                    "starship_favorites": starship_results}
+        response_body["character_favorites"] = character_results
+        response_body["planet_favorites"] = planet_results
+        response_body["starship_favorites"] = starship_results
         return jsonify(response_body), 200
 
 
@@ -251,17 +231,13 @@ def handle_favorite_characters(character_id):
     response_body = {}
     claims = get_jwt()
     token_user_id = claims["user_id"]
-    if not token_user_id:
-        response_body["message"] = "Current user not found"
-        response_body["results"] = None
-        return jsonify(response_body), 401
     character_exists = db.session.execute(db.select(Characters).where(Characters.id == character_id)).scalar()
     if not character_exists:
         response_body["message"] = f"Character {character_id} not found"
         response_body["results"] = None
         return jsonify(response_body), 404
-    favorite_already_exists = db.session.execute(db.select(CharacterFavorites).where(CharacterFavorites.user_id == token_user_id),
-                                                                                     CharacterFavorites.character_id == character_id).scalar()
+    favorite_already_exists = db.session.execute(db.select(CharacterFavorites).where(and_(CharacterFavorites.user_id == token_user_id,
+                                                                                          CharacterFavorites.character_id == character_id))).scalar()
     if request.method == "POST":
         if favorite_already_exists:
             response_body["message"] = f"User {token_user_id} has character {character_id} already saved as favorite"
@@ -285,7 +261,7 @@ def handle_favorite_characters(character_id):
         db.session.commit()
         response_body["message"] = f"User {token_user_id} deleted successfully character {character_id} from favorites"
         response_body["results"] = None
-        return jsonify(response_body), 200
+        return jsonify(response_body), 204
     
 
 @api.route("/planets")
@@ -365,17 +341,13 @@ def handle_favorite_planets(planet_id):
     response_body = {}
     claims = get_jwt()
     token_user_id = claims["user_id"]
-    if not token_user_id:
-        response_body["message"] = "Current user not found"
-        response_body["results"] = None
-        return jsonify(response_body), 401
     planet_exists = db.session.execute(db.select(Planets).where(Planets.id == planet_id)).scalar()
     if not planet_exists:
         response_body["message"] = f"Planet {planet_id} not found"
         response_body["results"] = None
         return jsonify(response_body), 404
-    favorite_already_exists = db.session.execute(db.select(PlanetFavorites).where(PlanetFavorites.user_id == token_user_id),
-                                                                                     PlanetFavorites.planet_id == planet_id).scalar()
+    favorite_already_exists = db.session.execute(db.select(PlanetFavorites).where(and_(PlanetFavorites.user_id == token_user_id,
+                                                                                       PlanetFavorites.planet_id == planet_id))).scalar()
     if request.method == "POST":
         if favorite_already_exists:
             response_body["message"] = f"User {token_user_id} has planet {planet_id} already saved as favorite"
@@ -399,7 +371,7 @@ def handle_favorite_planets(planet_id):
         db.session.commit()
         response_body["message"] = f"User {token_user_id} deleted successfully planet {planet_id} from favorites"
         response_body["results"] = None
-        return jsonify(response_body), 200
+        return jsonify(response_body), 204
     
 
 @api.route("/starships")
@@ -482,17 +454,13 @@ def handle_favorite_starships(starship_id):
     response_body = {}
     claims = get_jwt()
     token_user_id = claims["user_id"]
-    if not token_user_id:
-        response_body["message"] = "Current user not found"
-        response_body["results"] = None
-        return jsonify(response_body), 401
     starship_exists = db.session.execute(db.select(Starships).where(Starships.id == starship_id)).scalar()
     if not starship_exists:
         response_body["message"] = f"Starship {starship_id} not found"
         response_body["results"] = None
         return jsonify(response_body), 404
-    favorite_already_exists = db.session.execute(db.select(StarshipFavorites).where(StarshipFavorites.user_id == token_user_id),
-                                                                                     StarshipFavorites.starship_id == starship_id).scalar()
+    favorite_already_exists = db.session.execute(db.select(StarshipFavorites).where(and_(StarshipFavorites.user_id == token_user_id,
+                                                                                         StarshipFavorites.starship_id == starship_id))).scalar()
     if request.method == "POST":
         if favorite_already_exists:
             response_body["message"] = f"User {token_user_id} has starship {starship_id} already saved as favorite"
@@ -516,4 +484,4 @@ def handle_favorite_starships(starship_id):
         db.session.commit()
         response_body["message"] = f"User {token_user_id} deleted successfully starship {starship_id} from favorites"
         response_body["results"] = None
-        return jsonify(response_body), 200
+        return jsonify(response_body), 204
