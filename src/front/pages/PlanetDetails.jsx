@@ -10,7 +10,7 @@ export const PlanetDetails = () => {
     const { store, dispatch } = useGlobalReducer();
     const planetDetails = store.planetDetails;
     const planetFavorites = store.planetFavorites;
-    const isPlanetFavorite = planetFavorites.find(favorite => favorite.planet_id === planetId);
+    const isPlanetFavorite = planetFavorites.find(favorite => favorite.planet_id === Number(planetId));
 
     useEffect(() => {
         const initializePlanetDetails = async () => {

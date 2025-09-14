@@ -76,6 +76,7 @@ export const Settings = () => {
                                 value={lastName} onChange={handleLastName} />
                         </div>
                         <button className="w-100 my-2 btn btn-lg rounded-3 btn-dark" type="submit">Save</button>
+                        <button onClick={handleDeleteUser} className="w-100 my-2 btn btn-lg rounded-3 btn-danger" type="button">Delete</button>
                     </form>
                 </div>
             </div>

@@ -7,11 +7,11 @@ import starWarsImageError from "../assets/star-wars-image-error.jpg";
 
 export const CharacterDetails = () => {
     const navigate = useNavigate();
-    const { characterId } = useParams();
+    const { characterId } = useParams();;
     const { store, dispatch } = useGlobalReducer();
     const characterDetails = store.characterDetails;
     const characterFavorites = store.characterFavorites;
-    const isCharacterFavorite = characterFavorites.find(favorite => favorite.character_id === characterId);
+    const isCharacterFavorite = characterFavorites.find(favorite => favorite.character_id === Number(characterId));
 
     useEffect(() => {
         const initializeCharacterDetails = async () => {

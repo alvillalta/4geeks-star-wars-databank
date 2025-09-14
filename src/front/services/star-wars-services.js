@@ -14,7 +14,7 @@ export const putUser = async (userId, userToPut) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const userPut = await response.json();
   localStorage.setItem("user", JSON.stringify(userPut.results));
@@ -34,7 +34,7 @@ export const deleteUser = async (userId) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   localStorage.clear();
   return response.status;
@@ -62,7 +62,7 @@ export const getFavorites = async (userId) => {
     const response = await fetch(uri, options);
     if (!response.ok) {
       const backError = await response.json();
-      throw new Error(backError.message);
+      throw new Error(backError.message || `Error ${response.status}`);
     }
     const backData = await response.json();
     localStorage.setItem(`character-favorites`, JSON.stringify(backData.character_favorites));
@@ -93,7 +93,7 @@ export const getCharacters = async () => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const charactersData = await response.json();
   localStorage.setItem("characters", JSON.stringify(charactersData.results));
@@ -111,7 +111,7 @@ export const getCharacterDetails = async (characterId) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const characterDetailsData = await response.json();
   localStorage.setItem(`character-details-${characterId}`, JSON.stringify(characterDetailsData.results));
@@ -131,11 +131,14 @@ export const postCharacterFavorite = async (characterId) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    if (response.status === 401 || response.status === 422) {
+        throw new Error("Please log in to manage favorites")
+    }
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const characterFavorite = await response.json();
   const storedCharacterFavorites = JSON.parse(localStorage.getItem("character-favorites")) || [];
-  const updatedCharacterFavorites = storedCharacterFavorites.push(characterFavorite.results);
+  const updatedCharacterFavorites = [...storedCharacterFavorites, characterFavorite.results];
   localStorage.setItem("character-favorites", JSON.stringify(updatedCharacterFavorites));
   return characterFavorite.results;
 };
@@ -153,7 +156,7 @@ export const deleteCharacterFavorite = async (characterId) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const storedCharacterFavorites = JSON.parse(localStorage.getItem("character-favorites"));
   const updatedCharacterFavorites = storedCharacterFavorites.filter(favorite => favorite.character_id !== characterId);
@@ -172,7 +175,7 @@ export const getPlanets = async () => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const planetsData = await response.json();
   localStorage.setItem("planets", JSON.stringify(planetsData.results));
@@ -190,7 +193,7 @@ export const getPlanetDetails = async (planetId) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const planetDetailsData = await response.json();
   localStorage.setItem(`planet-details-${planetId}`, JSON.stringify(planetDetailsData.results));
@@ -210,11 +213,14 @@ export const postPlanetFavorite = async (planetId) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    if (response.status === 401 || response.status === 422) {
+        throw new Error("Please log in to manage favorites")
+    }
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const planetFavorite = await response.json();
   const storedPlanetFavorites = JSON.parse(localStorage.getItem("planet-favorites")) || [];
-  const updatedPlanetFavorites = storedPlanetFavorites.push(planetFavorite.results);
+  const updatedPlanetFavorites = [...storedPlanetFavorites, planetFavorite.results];
   localStorage.setItem("planet-favorites", JSON.stringify(updatedPlanetFavorites));
   return planetFavorite.results;
 };
@@ -232,7 +238,7 @@ export const deletePlanetFavorite = async (planetId) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const storedPlanetFavorites = JSON.parse(localStorage.getItem("planet-favorites"));
   const updatedPlanetFavorites = storedPlanetFavorites.filter(favorite => favorite.planet_id !== planetId);
@@ -251,7 +257,7 @@ export const getStarships = async () => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const starshipsData = await response.json();
   localStorage.setItem("starships", JSON.stringify(starshipsData.results));
@@ -269,7 +275,7 @@ export const getStarshipDetails = async (starshipId) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const starshipDetailsData = await response.json();
   localStorage.setItem(`starship-details-${starshipId}`, JSON.stringify(starshipDetailsData.results));
@@ -289,11 +295,14 @@ export const postStarshipFavorite = async (starshipId) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    if (response.status === 401 || response.status === 422) {
+        throw new Error("Please log in to manage favorites")
+    }
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const starshipFavorite = await response.json();
-  const storedStarhipFavorites = JSON.parse(localStorage.getItem("starship-favorites")) || [];
-  const updatedStarshipFavorites = storedStarhipFavorites.push(starshipFavorite.results);
+  const storedStarshipFavorites = JSON.parse(localStorage.getItem("starship-favorites")) || [];
+  const updatedStarshipFavorites = [...storedStarshipFavorites, starshipFavorite.results];
   localStorage.setItem("starship-favorites", JSON.stringify(updatedStarshipFavorites));
   return starshipFavorite.results;
 };
@@ -311,7 +320,7 @@ export const deleteStarshipFavorite = async (starshipId) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const storedStarhipFavorites = JSON.parse(localStorage.getItem("starship-favorites"));
   const updatedStarshipFavorites = storedStarhipFavorites.filter(favorite => favorite.starship_id !== starshipId);

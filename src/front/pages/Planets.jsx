@@ -8,12 +8,11 @@ export const Planets = () => {
     const navigate = useNavigate();
     const { store, dispatch } = useGlobalReducer();
     const planets = store.planets;
-    const favorites = store.favorites;
     const planetFavorites = store.planetFavorites;
 
     useEffect(() => {
         const initializePlanets = async () => {
-            const planetsGot = await getCharacters();
+            const planetsGot = await getPlanets();
             dispatch({
                 type: "PLANETS",
                 payload: planetsGot

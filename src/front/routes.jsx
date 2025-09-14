@@ -18,6 +18,7 @@ import { CharacterDetails } from "./pages/CharacterDetails.jsx";
 import { Planets } from "./pages/Planets.jsx";
 import { PlanetDetails } from "./pages/PlanetDetails.jsx";
 import { Starships } from "./pages/Starships.jsx";
+import { StarshipDetails } from "./pages/StarshipDetails.jsx";
 
 <Route path="/settings" element={<Settings />} />
 

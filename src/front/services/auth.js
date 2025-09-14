@@ -11,7 +11,7 @@ export const signup = async (userToPost) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const signupOk = await response.json();
   localStorage.setItem("token", signupOk.access_token);
@@ -33,7 +33,7 @@ export const login = async (userToPost) => {
   const response = await fetch(uri, options);
   if (!response.ok) {
     const backError = await response.json();
-    throw new Error(backError.message);
+    throw new Error(backError.message || `Error ${response.status}`);
   }
   const loginOk = await response.json();
   localStorage.setItem("token", loginOk.access_token);

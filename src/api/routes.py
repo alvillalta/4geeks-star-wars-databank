@@ -7,6 +7,7 @@ from flask_cors import CORS
 from api.models import db, Users, CharacterFavorites, Characters, PlanetFavorites, Planets, StarshipFavorites, Starships
 import requests
 from sqlalchemy import asc
+from sqlalchemy import and_
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
@@ -58,9 +59,9 @@ def login():
     user_to_login = request.json
     email = user_to_login.get("email").lower()
     password = user_to_login.get("password")
-    user = db.session.execute(db.select(Users).where(Users.email == email,
-                                                     Users.password == password,
-                                                     Users.is_active == True)).scalar()
+    user = db.session.execute(db.select(Users).where(and_(Users.email == email,
+                                                          Users.password == password,
+                                                          Users.is_active == True))).scalar()
     if not user:
         response_body["message"] = f"Bad email or password"
         response_body["results"] = None
@@ -89,10 +90,6 @@ def handle_user(user_id):
     response_body = {}
     claims = get_jwt()
     token_user_id = claims["user_id"]
-    if not token_user_id:
-        response_body["message"] = "Current user not found"
-        response_body["results"] = None
-        return jsonify(response_body), 401
     user_to_handle = db.session.execute(db.select(Users).where(Users.id == user_id)).scalar()
     if not user_to_handle:
         response_body["message"] = f"User {user_id} not found"
@@ -132,12 +129,6 @@ def handle_user(user_id):
 @jwt_required()
 def handle_favorites(user_id):
     response_body = {}
-    claims = get_jwt()
-    token_user_id = claims["user_id"]
-    if not token_user_id:
-        response_body["message"] = "Current user not found"
-        response_body["results"] = None
-        return jsonify(response_body), 401
     user_to_handle = db.session.execute(db.select(Users).where(Users.id == user_id)).scalar()
     if not user_to_handle:
         response_body["message"] = f"User {user_id} not found"
@@ -240,17 +231,13 @@ def handle_favorite_characters(character_id):
     response_body = {}
     claims = get_jwt()
     token_user_id = claims["user_id"]
-    if not token_user_id:
-        response_body["message"] = "Current user not found"
-        response_body["results"] = None
-        return jsonify(response_body), 401
     character_exists = db.session.execute(db.select(Characters).where(Characters.id == character_id)).scalar()
     if not character_exists:
         response_body["message"] = f"Character {character_id} not found"
         response_body["results"] = None
         return jsonify(response_body), 404
-    favorite_already_exists = db.session.execute(db.select(CharacterFavorites).where(CharacterFavorites.user_id == token_user_id),
-                                                                                     CharacterFavorites.character_id == character_id).scalar()
+    favorite_already_exists = db.session.execute(db.select(CharacterFavorites).where(and_(CharacterFavorites.user_id == token_user_id,
+                                                                                          CharacterFavorites.character_id == character_id))).scalar()
     if request.method == "POST":
         if favorite_already_exists:
             response_body["message"] = f"User {token_user_id} has character {character_id} already saved as favorite"
@@ -354,17 +341,13 @@ def handle_favorite_planets(planet_id):
     response_body = {}
     claims = get_jwt()
     token_user_id = claims["user_id"]
-    if not token_user_id:
-        response_body["message"] = "Current user not found"
-        response_body["results"] = None
-        return jsonify(response_body), 401
     planet_exists = db.session.execute(db.select(Planets).where(Planets.id == planet_id)).scalar()
     if not planet_exists:
         response_body["message"] = f"Planet {planet_id} not found"
         response_body["results"] = None
         return jsonify(response_body), 404
-    favorite_already_exists = db.session.execute(db.select(PlanetFavorites).where(PlanetFavorites.user_id == token_user_id),
-                                                                                     PlanetFavorites.planet_id == planet_id).scalar()
+    favorite_already_exists = db.session.execute(db.select(PlanetFavorites).where(and_(PlanetFavorites.user_id == token_user_id,
+                                                                                       PlanetFavorites.planet_id == planet_id))).scalar()
     if request.method == "POST":
         if favorite_already_exists:
             response_body["message"] = f"User {token_user_id} has planet {planet_id} already saved as favorite"
@@ -471,17 +454,13 @@ def handle_favorite_starships(starship_id):
     response_body = {}
     claims = get_jwt()
     token_user_id = claims["user_id"]
-    if not token_user_id:
-        response_body["message"] = "Current user not found"
-        response_body["results"] = None
-        return jsonify(response_body), 401
     starship_exists = db.session.execute(db.select(Starships).where(Starships.id == starship_id)).scalar()
     if not starship_exists:
         response_body["message"] = f"Starship {starship_id} not found"
         response_body["results"] = None
         return jsonify(response_body), 404
-    favorite_already_exists = db.session.execute(db.select(StarshipFavorites).where(StarshipFavorites.user_id == token_user_id),
-                                                                                    StarshipFavorites.starship_id == starship_id).scalar()
+    favorite_already_exists = db.session.execute(db.select(StarshipFavorites).where(and_(StarshipFavorites.user_id == token_user_id,
+                                                                                         StarshipFavorites.starship_id == starship_id))).scalar()
     if request.method == "POST":
         if favorite_already_exists:
             response_body["message"] = f"User {token_user_id} has starship {starship_id} already saved as favorite"

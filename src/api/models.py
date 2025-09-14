@@ -49,14 +49,15 @@ class CharacterFavorites(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "character_id": self.character_id}
+            "character_id": self.character_id,
+            "character_name": self.character_to.name if self.character_to else None}
 
 
 class Characters(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), unique=True, nullable=False)
-    height = db.Column(db.Integer)
-    mass = db.Column(db.Integer)
+    height = db.Column(db.String(50))
+    mass = db.Column(db.String(50))
     hair_color = db.Column(db.String(200))
     skin_color = db.Column(db.String(200))
     eye_color = db.Column(db.String(200))
@@ -94,17 +95,18 @@ class PlanetFavorites(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "planet_id": self.planet_id}
+            "planet_id": self.planet_id,
+            "planet_name": self.planet_to.name if self.planet_to else None}
 
 
 class Planets(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), unique=True, nullable=False)
     diameter = db.Column(db.Integer)
-    rotation_period = db.Column(db.Integer)
-    orbital_period = db.Column(db.Integer)
+    rotation_period = db.Column(db.String(50))
+    orbital_period = db.Column(db.String(50))
     gravity = db.Column(db.String(200))
-    population = db.Column(db.Integer)
+    population = db.Column(db.String(50))
     climate = db.Column(db.String(200))
     terrain = db.Column(db.String(200))
 
@@ -139,23 +141,24 @@ class StarshipFavorites(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "starship_id": self.starship_id}
+            "starship_id": self.starship_id,
+            "starship_name": self.starship_to.name if self.starship_to else None}
 
 
 class Starships(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), unique=True, nullable=False)
     consumables = db.Column(db.String(200))
-    cargo_capacity = db.Column(db.Integer)
-    passengers = db.Column(db.Integer)
-    max_atmosphering_speed = db.Column(db.Integer)
+    cargo_capacity = db.Column(db.String(50))
+    passengers = db.Column(db.String(50))
+    max_atmosphering_speed = db.Column(db.String(50))
     crew = db.Column(db.String(200))
-    cost_in_credits = db.Column(db.Integer)
-    length = db.Column(db.Integer)
+    cost_in_credits = db.Column(db.String(50))
+    length = db.Column(db.String(50))
     model = db.Column(db.String(400))
     manufacturer = db.Column(db.String(600))
     starship_class = db.Column(db.String(400))
-    hyperdrive_rating = db.Column(db.Float)
+    hyperdrive_rating = db.Column(db.String(50))
 
     def serialize(self):
         return {

@@ -10,7 +10,7 @@ export const StarshipDetails = () => {
     const { store, dispatch } = useGlobalReducer();
     const starshipDetails = store.starshipDetails;
     const starshipFavorites = store.starshipFavorites;
-    const isStarshipFavorite = starshipFavorites.find(favorite => favorite.starship_id === starshipId);
+    const isStarshipFavorite = starshipFavorites.find(favorite => favorite.starship_id === Number(starshipId));
 
     useEffect(() => {
         const initializeStarshipDetails = async () => {
@@ -84,7 +84,7 @@ export const StarshipDetails = () => {
                         </ul>
                         <div className="d-flex justify-content-start gap-3 py-3 ps-3">
                             <button onClick={handleBack} className="btn btn-secondary ">Back</button>
-                            <button onClick={handleStarshipFavorites(starshipId, isStarshipFavorite)}
+                            <button onClick={() => handleStarshipFavorites(starshipId, isStarshipFavorite)}
                                 type="button" className="p-0 border-0 bg-transparent">
                                 <i className={`fa-${isStarshipFavorite ? "solid" : "regular"} fa-xl fa-heart`}></i>
                             </button>

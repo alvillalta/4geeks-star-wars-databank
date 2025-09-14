@@ -59,7 +59,10 @@ export default function storeReducer(store, action = {}) {
       return { ...store, characterFavorites: action.payload };
 
     case "POST-CHARACTER-FAVORITE":
-      return { ...store, characterFavorites: store.characterFavorites.push(action.payload) };
+      return { 
+          ...store, characterFavorites: 
+            [...store.characterFavorites, action.payload] 
+      };
 
     case "DELETE-CHARACTER-FAVORITE":
       return { ...store, characterFavorites: store.characterFavorites.filter(favorite => favorite.character_id !== action.payload) };
@@ -74,7 +77,10 @@ export default function storeReducer(store, action = {}) {
       return { ...store, planetFavorites: action.payload };
 
     case "POST-PLANET-FAVORITE":
-      return { ...store, planetFavorites: store.planetFavorites.push(action.payload) };
+      return { 
+          ...store, planetFavorites: 
+            [...store.planetFavorites, action.payload] 
+      };
 
     case "DELETE-PLANET-FAVORITE":
       return { ...store, planetFavorites: store.planetFavorites.filter(favorite => favorite.planet_id !== action.payload) };  
@@ -89,7 +95,10 @@ export default function storeReducer(store, action = {}) {
       return { ...store, starshipFavorites: action.payload };
 
     case "POST-STARSHIP-FAVORITE":
-      return { ...store, starshipFavorites: store.starshipFavorites.push(action.payload) };
+      return { 
+          ...store, starshipFavorites: 
+            [...store.starshipFavorites, action.payload] 
+      };
 
     case "DELETE-STARSHIP-FAVORITE":
       return { ...store, starshipFavorites: store.starshipFavorites.filter(favorite => favorite.starship_id !== action.payload) };
