@@ -123,39 +123,45 @@ export const Favorites = () => {
                 <h3 className="mb-0">{filter} Favorites</h3>
             </div>
             <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-2">
-                {filteredFavorites(filter).map((item) => {
-                    const type = (filter === "All") ? getType(item) : filter.toLowerCase();
-                    const card = cardConfiguration[type];
-                    return (
-                        <div className="col" key={card.type + "-" + card.id(item)}>
-                            <div className="card mb-3">
-                                <img src={card.image(item)} onError={handleImageError} className="css-card-image card-img-top"/>
-                                <div className="d-flex align-items-start">
-                                    <div className="card-body text-start">
-                                        <h5 className="card-title">{card.favoriteName(item)}</h5>
-                                        <div className="d-flex justify-content-between align-items-center">
-                                            <div className="d-flex align-items-center gap-3">
-                                            <button onClick={() => card.route(item)} className="btn btn-dark">
-                                                Details
-                                            </button>
-                                                {filter === "All" ? 
-                                                    <span className="text-secondary">
-                                                        {card.icon}
-                                                    </span>
-                                                    : 
-                                                    <span className="d-none"></span>
-                                                }
+                {allFavorites.length === 0 ?
+                    <div class="alert alert-dark" role="alert">
+                        There are no favorites left
+                    </div>
+                    :
+                    filteredFavorites(filter).map((item) => {
+                        const type = (filter === "All") ? getType(item) : filter.toLowerCase();
+                        const card = cardConfiguration[type];
+                        return (
+                            <div className="col" key={card.type + "-" + card.id(item)}>
+                                <div className="card mb-3">
+                                    <img src={card.image(item)} onError={handleImageError} className="css-card-image card-img-top"/>
+                                    <div className="d-flex align-items-start">
+                                        <div className="card-body text-start">
+                                            <h5 className="card-title">{card.favoriteName(item)}</h5>
+                                            <div className="d-flex justify-content-between align-items-center">
+                                                <div className="d-flex align-items-center gap-3">
+                                                <button onClick={() => card.route(item)} className="btn btn-dark">
+                                                    Details
+                                                </button>
+                                                    {filter === "All" ? 
+                                                        <span className="text-secondary">
+                                                            {card.icon}
+                                                        </span>
+                                                        : 
+                                                        <span className="d-none"></span>
+                                                    }
+                                                </div>
+                                                <button onClick={() => card.deleteFavorite(item)} type="button" className="border-0 bg-transparent text-dark">
+                                                    <i className="fa-solid fa-xmark fa-xl"></i>
+                                                </button>
                                             </div>
-                                            <button onClick={() => card.deleteFavorite(item)} type="button" className="border-0 bg-transparent text-dark">
-                                                <i className="fa-solid fa-xmark fa-xl"></i>
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    )
-                })}
+                        );
+                    })
+                }
             </div>
         </div >
     )

@@ -31,7 +31,7 @@ def signup():
         response_body["message"] = f"User {user.email} already exists"
         response_body["results"] = None
         return jsonify(response_body), 409
-    user.password = user_to_post.get("password")
+    user.password = user.set_password(user_to_post.get("password"))
     user.is_active = True
     user.is_admin = False
     user.first_name = user_to_post.get("first_name", None)
@@ -58,10 +58,9 @@ def login():
     email = user_to_login.get("email").lower()
     password = user_to_login.get("password")
     user = db.session.execute(db.select(Users).where(and_(Users.email == email,
-                                                          Users.password == password,
                                                           Users.is_active == True))).scalar()
-    if not user:
-        response_body["message"] = f"Bad email or password"
+    if not user or not user.check_password(password):
+        response_body["message"] = f"Invalid credentials"
         response_body["results"] = None
         return jsonify(response_body), 401
     if not user.is_active:

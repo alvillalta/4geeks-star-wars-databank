@@ -1,4 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
+import bcrypt
+import getpass
 
 
 db = SQLAlchemy()
@@ -7,13 +9,21 @@ db = SQLAlchemy()
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), nullable=False)
+    password = db.Column(db.LargeBinary(20), nullable=False)
     is_active = db.Column(db.Boolean(), default=True, nullable=False)
     first_name = db.Column(db.String())
     last_name = db.Column(db.String())
 
     def __repr__(self):
         return f"<User {self.id} - {self.email}>"
+    
+    def set_password(self, plain_password):
+        salt = bcrypt.gensalt()
+        self.password = bcrypt.hashpw(plain_password.encode("utf-8"), salt)
+        return self.password
+
+    def check_password(self, plain_password):
+        return bcrypt.checkpw(plain_password.encode("utf-8"), self.password)
 
     def serialize_basic(self):
         return {"id": self.id,
