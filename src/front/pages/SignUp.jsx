@@ -10,11 +10,13 @@ export const SignUp = () => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [repeatPassword, setRepeatPassword] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
 
     const handleEmail = event => setEmail(event.target.value);
     const handlePassword = event => setPassword(event.target.value);
+    const handleRepeatPassword = event => setRepeatPassword(event.target.value);
     const handleFirstName = event => setFirstName(event.target.value);
     const handleLastName = event => setLastName(event.target.value);
 
@@ -23,6 +25,7 @@ export const SignUp = () => {
         const userToPost = {
             "email": email,
             "password": password,
+            "repeat_password": repeatPassword,
             "first_name": firstName,
             "last_name": lastName
         };
@@ -64,7 +67,22 @@ export const SignUp = () => {
                 </div>
                 <div className="p-5 pt-0">
                     <form onSubmit={handleSubmitSignUp}>
-                        <div className="mb-4">
+                        <div className="mb-3">
+                            <label htmlFor="signUpEmail" className="mb-2">Email address<span className="text-body-tertiary">*</span></label>
+                            <input type="email" className="form-control rounded-3" id="signUpEmail" placeholder="name@example.com"
+                                value={email} onChange={handleEmail} required />
+                        </div>
+                        <div className="mb-3">
+                            <label htmlFor="signUpPassword" className="mb-2">Password<span className="text-body-tertiary">*</span></label>
+                            <input type="password" className="form-control rounded-3" id="signUpPassword" placeholder="Password"
+                                value={password} onChange={handlePassword} required />
+                        </div>
+                        <div className="mb-3">
+                            <label htmlFor="signUpRepeatPassword" className="mb-2">Repeat Password<span className="text-body-tertiary">*</span></label>
+                            <input type="password" className="form-control rounded-3" id="signUpRepeatPassword" placeholder="Password"
+                                value={repeatPassword} onChange={handleRepeatPassword} required />
+                        </div>
+                        <div className="mb-3">
                             <label htmlFor="signUpFirstName" className="mb-2">First Name</label>
                             <input type="text" className="form-control rounded-3" id="signUpFirstName" placeholder="Your first name"
                                 value={firstName} onChange={handleFirstName} />
@@ -73,16 +91,6 @@ export const SignUp = () => {
                             <label htmlFor="signUpLastName" className="mb-2">Last Name</label>
                             <input type="text" className="form-control rounded-3" id="signUpLastName" placeholder="Your last name"
                                 value={lastName} onChange={handleLastName} />
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="signUpEmail" className="mb-2">Email address</label>
-                            <input type="email" className="form-control rounded-3" id="signUpEmail" placeholder="name@example.com"
-                                value={email} onChange={handleEmail} />
-                        </div>
-                        <div className="mb-4">
-                            <label htmlFor="signUpPassword" className="mb-2">Password</label>
-                            <input type="password" className="form-control rounded-3" id="signUpPassword" placeholder="Password"
-                                value={password} onChange={handlePassword} />
                         </div>
                         <button className="w-100 my-2 btn btn-lg rounded-3 btn-dark" type="submit">Sign Up</button>
                         <hr className="my-4" />

@@ -38,7 +38,7 @@ export default function storeReducer(store, action = {}) {
     case "LOGIN":
       return { ...store, login: action.payload };
 
-    case "LOGOUT":
+    case "CLEAR-STORE":
       return initialStore();
 
     case "CURRENT-USER":

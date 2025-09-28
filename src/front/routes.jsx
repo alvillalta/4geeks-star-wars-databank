@@ -6,8 +6,10 @@ import {
 
 import { Layout } from "./pages/Layout.jsx";
 import { Home } from "./pages/Home.jsx";
-import { Login } from "./pages/Login.jsx";
 import { SignUp } from "./pages/SignUp.jsx";
+import { Login } from "./pages/Login.jsx";
+import { RecoverPassword } from "./pages/RecoverPassword.jsx";
+import { ResetPassword } from "./pages/ResetPassword.jsx";
 import { Settings } from "./pages/Settings.jsx";
 import { Favorites } from "./pages/Favorites.jsx";
 import { ContactList } from "./pages/ContactList.jsx";
@@ -35,8 +37,10 @@ export const router = createBrowserRouter(
 
       {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/recover-password" element={<RecoverPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/favorites" element={<Favorites />} />
       <Route path="/contacts" element={<ContactList />} />

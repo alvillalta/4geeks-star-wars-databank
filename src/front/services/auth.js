@@ -99,6 +99,39 @@ export const deleteUser = async (userId) => {
     const backError = await response.json();
     throw new Error(backError.message || `Error ${response.status}`);
   }
-  localStorage.clear();
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("character-favorites");
+  localStorage.removeItem("planet-favorites");
+  localStorage.removeItem("starship-favorites");
+  const keys = Object.keys(localStorage);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (key.includes("character-details")) {
+      localStorage.removeItem(key);
+    }
+    if (key.includes("planet-details")) {
+      localStorage.removeItem(key);
+    }
+    if (key.includes("starship-details")) {
+      localStorage.removeItem(key);
+    }
+  }
+  return response.status;
+};
+
+
+export const recoverPassword = async (userToRecover) => {
+  const uri = `${host}/api/recover-password`;
+  const options = {
+    method: "POST",
+    headers: { "Content-type": "application/json" },
+    body: JSON.stringify(userToRecover),
+  };
+  const response = await fetch(uri, options);
+  if (!response.ok) {
+    const backError = await response.json();
+    throw new Error(backError.message || `Error ${response.status}`);
+  }
   return response.status;
 };

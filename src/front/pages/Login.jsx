@@ -71,15 +71,16 @@ export const Login = () => {
                 <div className="p-5 pt-0">
                     <form onSubmit={handleSubmitLogin}>
                         <div className="mb-3">
-                            <label htmlFor="loginEmail" className="mb-2">Email address</label>
+                            <label htmlFor="loginEmail" className="mb-2">Email address<span className="text-body-tertiary">*</span></label>
                             <input type="email" className="form-control rounded-3" id="loginEmail" placeholder="name@example.com"
-                                value={email} onChange={handleEmail} />
+                                value={email} onChange={handleEmail} required/>
                         </div>
-                        <div className="mb-4">
-                            <label htmlFor="loginPassword" className="mb-2">Password</label>
+                        <div className="mb-3">
+                            <label htmlFor="loginPassword" className="mb-2">Password<span className="text-body-tertiary">*</span></label>
                             <input type="password" className="form-control rounded-3" id="loginPassword" placeholder="Password"
-                                value={password} onChange={handlePassword} />
+                                value={password} onChange={handlePassword} required/>
                         </div>
+                        <p className="text-body-secondary mb-4">Forgot your password? <Link to="/recover-password" className="text-dark">Click here</Link></p>
                         <button className="w-100 my-2 btn btn-lg rounded-3 btn-dark" type="submit">Log In</button>
                         <hr className="my-4" />
                         <p className="text-body-secondary">Don't have an account? <Link to="/signup" className="text-dark">Sign up here</Link></p>

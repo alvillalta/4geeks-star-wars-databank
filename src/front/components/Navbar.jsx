@@ -14,7 +14,7 @@ export const Navbar = () => {
 	const handleLogIn = () => {
 		if (store.login.isLogged) {
 			logout();
-			dispatch({ type: "LOGOUT" }); 
+			dispatch({ type: "CLEAR-STORE" }); 
 			navigate("/");
 		} else {
 			navigate("/login");

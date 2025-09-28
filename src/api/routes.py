@@ -6,6 +6,7 @@ from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from api.models import db, Users, CharacterFavorites, Characters, PlanetFavorites, Planets, StarshipFavorites, Starships
 import requests
+import re
 from sqlalchemy import asc, desc
 from sqlalchemy import and_
 from flask_jwt_extended import create_access_token
@@ -19,22 +20,69 @@ api = Blueprint("api", __name__)
 CORS(api)  # Allow CORS requests to this API
 
 
-# Signup access token
 @api.route("/signup", methods=["POST"])
 def signup():
     response_body = {}
     user_to_post = request.json
     user = Users()
-    user.email = user_to_post.get("email").lower()
-    existing_user = db.session.execute(db.select(Users).where(Users.email == user.email)).scalar()
+    email_exists = user_to_post.get("email", None)
+    if not email_exists or email_exists.strip() == "":
+        response_body["message"] = f"Email is required"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    email = email_exists.lower().strip()
+    if not len(email) < 100:
+        response_body["message"] = f"Email must be less than 100 characters"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+        response_body["message"] = "Use a valid email"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    existing_user = db.session.execute(db.select(Users).where(Users.email == email)).scalar()
     if existing_user:
-        response_body["message"] = f"User {user.email} already exists"
+        response_body["message"] = f"User already exists"
         response_body["results"] = None
         return jsonify(response_body), 409
-    user.password = user.set_password(user_to_post.get("password"))
+    user.email = email
+    plain_password = user_to_post.get("password", None)
+    repeat_password = user_to_post.get("repeat_password", None)
+    if not plain_password or plain_password.strip() == "":
+        response_body["message"] = f"Password is required"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    if plain_password != repeat_password:
+        response_body["message"] = f"Passwords do not match"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    if not 8 < len(plain_password):
+        response_body["message"] = f"Password must be more than 8 characters"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    if not len(plain_password) < 64:
+        response_body["message"] = f"Password must be less than 64 characters"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    if not any(character.islower() for character in plain_password):
+        response_body["message"] = "Password must contain at least one lowercase letter"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    if not any(character.isupper() for character in plain_password):
+        response_body["message"] = "Password must contain at least one capital letter"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    if not any(character.isdigit() for character in plain_password):
+        response_body["message"] = "Password must contain at least one number"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    symbols = "@$!%-*?&"
+    if not any(character in symbols for character in plain_password):
+        response_body["message"] = f"Password must contain at least one of these symbols: @$!%-*?&"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    user.password = user.set_password(plain_password)
     user.is_active = True
-    user.is_admin = False
-    user.first_name = user_to_post.get("first_name", None)
+    user.first_name = user_to_post.get("first_name", None)        
     user.last_name = user_to_post.get("last_name", None)
     db.session.add(user)
     db.session.commit()
@@ -42,37 +90,39 @@ def signup():
     claims = {"user_id": user.id,
               "email": user.email}
 
-    access_token = create_access_token(
-        identity=user.email, additional_claims=claims)
+    access_token = create_access_token(identity=user.id, additional_claims=claims)
     response_body["message"] = f"User {user.id} posted successfully"
     response_body["results"] = user.serialize_basic()
     response_body["access_token"] = access_token
     return jsonify(response_body), 201
 
 
-# Login access token
 @api.route("/login", methods=["POST"])
 def login():
     response_body = {}
     user_to_login = request.json
-    email = user_to_login.get("email").lower()
-    password = user_to_login.get("password")
+    email_exists = user_to_login.get("email", None)
+    if not email_exists or email_exists.strip() == "":
+        response_body["message"] = f"Email is required"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    email = email_exists.lower().strip()
+    password = user_to_login.get("password", None)
+    if not password or password.strip() == "":
+        response_body["message"] = f"Password is required"
+        response_body["results"] = None
+        return jsonify(response_body), 400
     user = db.session.execute(db.select(Users).where(and_(Users.email == email,
                                                           Users.is_active == True))).scalar()
     if not user or not user.check_password(password):
         response_body["message"] = f"Invalid credentials"
         response_body["results"] = None
         return jsonify(response_body), 401
-    if not user.is_active:
-        response_body["message"] = f"User {user.email} is no longer active"
-        response_body["results"] = None
-        return jsonify(response_body), 403
 
     claims = {"user_id": user.id,
               "email": user.email}
 
-    access_token = create_access_token(
-        identity=email, additional_claims=claims)
+    access_token = create_access_token(identity=user.id, additional_claims=claims)
     response_body["message"] = f"User {user.email} logged successfully"
     response_body["results"] = user.serialize_basic()
     response_body["access_token"] = access_token

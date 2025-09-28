@@ -42,8 +42,8 @@ export const Settings = () => {
         event.preventDefault();
         try {
             const responseStatus = await deleteUser(currentUser.id);
-            if (responseStatus == 204) {
-                dispatch({ type: LOGOUT });
+            if (responseStatus === 204) {
+                dispatch({ type: "CLEAR-STORE" });
                 navigate("/");
             }
         } catch (error) {
