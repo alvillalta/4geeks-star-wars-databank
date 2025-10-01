@@ -15,7 +15,7 @@ export const RecoverPassword = () => {
     const handleSubmitRecoverPassword = async (event) => {
         event.preventDefault();
         const userToRecover = {
-            "email": recoveryEmail,
+            "recovery_email": recoveryEmail,
         }
         try {
             const responseStatus = await recoverPassword(userToRecover);
@@ -27,7 +27,7 @@ export const RecoverPassword = () => {
                 navigate("/");
             }
         } catch (error) {
-            setEmail("");
+            setRecoveryEmail("");
             dispatch({
                 type: "SET-NOTIFICATION",
                 payload: error.message 

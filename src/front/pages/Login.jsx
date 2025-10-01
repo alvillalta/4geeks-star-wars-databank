@@ -11,6 +11,7 @@ export const Login = () => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleEmail = event => setEmail(event.target.value);
     const handlePassword = event => setPassword(event.target.value);
@@ -55,6 +56,14 @@ export const Login = () => {
         }
     }
 
+    const handlePasswordVisibility = (showPassword) => {
+        if (showPassword === false) {
+            setShowPassword(true);
+        } else {
+            setShowPassword(false);
+        }
+    }
+
     const handleCancel = () => {
         navigate("/");
     }
@@ -71,14 +80,29 @@ export const Login = () => {
                 <div className="p-5 pt-0">
                     <form onSubmit={handleSubmitLogin}>
                         <div className="mb-3">
-                            <label htmlFor="loginEmail" className="mb-2">Email address<span className="text-body-tertiary">*</span></label>
-                            <input type="email" className="form-control rounded-3" id="loginEmail" placeholder="name@example.com"
+                            <label htmlFor="loginEmail" className="mb-2">
+                                Email address
+                                <span className="text-body-tertiary">*</span>
+                            </label>
+                            <input type="email" className="form-control" id="loginEmail" placeholder="name@example.com"
                                 value={email} onChange={handleEmail} required/>
                         </div>
                         <div className="mb-3">
-                            <label htmlFor="loginPassword" className="mb-2">Password<span className="text-body-tertiary">*</span></label>
-                            <input type="password" className="form-control rounded-3" id="loginPassword" placeholder="Password"
-                                value={password} onChange={handlePassword} required/>
+                            <label htmlFor="loginPassword" className="mb-2">
+                                Password
+                                <span className="text-body-tertiary">*</span>
+                            </label>
+                            <div className="input-group">
+                                <input type={showPassword ? "text" : "password"} className="form-control" id="loginPassword" placeholder={showPassword ? "Password" : "**********"}
+                                    value={password} onChange={handlePassword} required/>
+                                <button type="button" onClick={() => handlePasswordVisibility(showPassword)} className="input-group-text text-dark bg-tertiary">
+                                    {showPassword ? 
+                                        <i class="fa-solid fa-eye-slash"></i>
+                                        :
+                                        <i class="fa-solid fa-eye"></i>
+                                    }
+                                </button>
+                            </div>
                         </div>
                         <p className="text-body-secondary mb-4">Forgot your password? <Link to="/recover-password" className="text-dark">Click here</Link></p>
                         <button className="w-100 my-2 btn btn-lg rounded-3 btn-dark" type="submit">Log In</button>

@@ -11,8 +11,10 @@ class Users(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.LargeBinary(64), nullable=False)
     is_active = db.Column(db.Boolean(), default=True, nullable=False)
-    first_name = db.Column(db.String())
-    last_name = db.Column(db.String())
+    first_name = db.Column(db.String(50))
+    last_name = db.Column(db.String(50))
+    reset_token = db.Column(db.String())
+    reset_token_expires_at = db.Column(db.DateTime)
 
     def __repr__(self):
         return f"<User {self.id} - {self.email}>"

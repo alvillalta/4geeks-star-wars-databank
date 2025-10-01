@@ -2,23 +2,84 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
+from api.utils import generate_sitemap, APIException
 from api.models import db, Users, CharacterFavorites, Characters, PlanetFavorites, Planets, StarshipFavorites, Starships
-import requests
-import re
-from sqlalchemy import asc, desc
-from sqlalchemy import and_
 from flask_jwt_extended import create_access_token
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import decode_token
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import get_jwt
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+from sqlalchemy import asc
+from sqlalchemy import and_
+import smtplib
+import ssl
+from email.message import EmailMessage
+import requests
+import re
+import os
+
+
+backend_url = os.getenv("VITE_BACKEND_URL")
+email_user = os.getenv("EMAIL_USER")
+email_pass = os.getenv("EMAIL_PASS")
+smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+smtp_port = int(os.getenv("SMTP_PORT", 465))
 
 
 api = Blueprint("api", __name__)
 CORS(api)  # Allow CORS requests to this API
 
+
+def validate_email(email):
+        if not len(email) <= 100:
+            return "Email must be less than 100 characters"
+        elif any(character.isspace() for character in email):
+            return "Email must not contain any blank space"
+        elif not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+            return "Use a valid email"
+        else: return None
+
+
+def validate_password(password):
+        symbols = "@$!%-*?&"
+        if not 8 <= len(password):
+            return "Password must be more than 8 characters"
+        elif not len(password) <= 64:
+            return "Password must be less than 64 characters"
+        elif any(character.isspace() for character in password):
+            return "Password must not contain any blank space"
+        elif not any(character.islower() for character in password):
+            return "Password must contain at least one lowercase letter"
+        elif not any(character.isupper() for character in password):
+            return "Password must contain at least one capital letter"
+        elif not any(character.isdigit() for character in password):
+            return "Password must contain at least one number"
+        elif not any(character in symbols for character in password):
+            return "Password must contain at least one of these symbols: @$!%-*?&"
+        else: return None
+
+
+def send_mail(to_email, subject, body):
+    message = EmailMessage()
+    message["From"] = email_user
+    message["To"] = to_email
+    message["Subject"] = subject
+    message.set_content(body)
+    context = ssl.create_default_context()
+    mail_sent = {}
+    try:
+        with smtplib.SMTP_SSL(smtp_server, smtp_port, context=context) as server:
+            server.login(email_user, email_pass)
+            server.send_message(message)
+        mail_sent["message"] = f"Mail has been sent successfully"
+        mail_sent["results"] = True
+        return mail_sent
+    except Exception as error:
+        mail_sent["message"] = f"Error sending mail: {error}"
+        mail_sent["results"] = False
+        return mail_sent
+    
 
 @api.route("/signup", methods=["POST"])
 def signup():
@@ -30,13 +91,10 @@ def signup():
         response_body["message"] = f"Email is required"
         response_body["results"] = None
         return jsonify(response_body), 400
-    email = email_exists.lower().strip()
-    if not len(email) < 100:
-        response_body["message"] = f"Email must be less than 100 characters"
-        response_body["results"] = None
-        return jsonify(response_body), 400
-    if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
-        response_body["message"] = "Use a valid email"
+    email = email_exists.lower()
+    email_validation_error = validate_email(email)
+    if email_validation_error:
+        response_body["message"] = email_validation_error
         response_body["results"] = None
         return jsonify(response_body), 400
     existing_user = db.session.execute(db.select(Users).where(Users.email == email)).scalar()
@@ -55,29 +113,9 @@ def signup():
         response_body["message"] = f"Passwords do not match"
         response_body["results"] = None
         return jsonify(response_body), 400
-    if not 8 < len(plain_password):
-        response_body["message"] = f"Password must be more than 8 characters"
-        response_body["results"] = None
-        return jsonify(response_body), 400
-    if not len(plain_password) < 64:
-        response_body["message"] = f"Password must be less than 64 characters"
-        response_body["results"] = None
-        return jsonify(response_body), 400
-    if not any(character.islower() for character in plain_password):
-        response_body["message"] = "Password must contain at least one lowercase letter"
-        response_body["results"] = None
-        return jsonify(response_body), 400
-    if not any(character.isupper() for character in plain_password):
-        response_body["message"] = "Password must contain at least one capital letter"
-        response_body["results"] = None
-        return jsonify(response_body), 400
-    if not any(character.isdigit() for character in plain_password):
-        response_body["message"] = "Password must contain at least one number"
-        response_body["results"] = None
-        return jsonify(response_body), 400
-    symbols = "@$!%-*?&"
-    if not any(character in symbols for character in plain_password):
-        response_body["message"] = f"Password must contain at least one of these symbols: @$!%-*?&"
+    password_validation_error = validate_password(plain_password)
+    if password_validation_error:
+        response_body["message"] = password_validation_error
         response_body["results"] = None
         return jsonify(response_body), 400
     user.password = user.set_password(plain_password)
@@ -86,11 +124,8 @@ def signup():
     user.last_name = user_to_post.get("last_name", None)
     db.session.add(user)
     db.session.commit()
-
-    claims = {"user_id": user.id,
-              "email": user.email}
-
-    access_token = create_access_token(identity=user.id, additional_claims=claims)
+    claims = {"user_id": user.id, "email": user.email}
+    access_token = create_access_token(identity=user.id, additional_claims=claims, expires_delta=timedelta(minutes=60))
     response_body["message"] = f"User {user.id} posted successfully"
     response_body["results"] = user.serialize_basic()
     response_body["access_token"] = access_token
@@ -106,7 +141,12 @@ def login():
         response_body["message"] = f"Email is required"
         response_body["results"] = None
         return jsonify(response_body), 400
-    email = email_exists.lower().strip()
+    email = email_exists.lower()
+    email_validation_error = validate_email(email)
+    if email_validation_error:
+        response_body["message"] = email_validation_error
+        response_body["results"] = None
+        return jsonify(response_body), 400
     password = user_to_login.get("password", None)
     if not password or password.strip() == "":
         response_body["message"] = f"Password is required"
@@ -118,15 +158,102 @@ def login():
         response_body["message"] = f"Invalid credentials"
         response_body["results"] = None
         return jsonify(response_body), 401
-
-    claims = {"user_id": user.id,
-              "email": user.email}
-
-    access_token = create_access_token(identity=user.id, additional_claims=claims)
+    claims = {"user_id": user.id, "email": user.email}
+    access_token = create_access_token(identity=user.id, additional_claims=claims, expires_delta=timedelta(minutes=60))
     response_body["message"] = f"User {user.email} logged successfully"
     response_body["results"] = user.serialize_basic()
     response_body["access_token"] = access_token
     return jsonify(response_body), 200
+
+
+@api.route("/recover-password", methods=["POST"])
+def recover_password():
+    response_body = {}
+    user_to_recover = request.json
+    recovery_email_exists = user_to_recover.get("recovery_email", None)
+    if not recovery_email_exists or recovery_email_exists.strip() == "":
+        response_body["message"] = f"Email is required"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    recovery_email = recovery_email_exists.lower()
+    email_validation_error = validate_email(recovery_email)
+    if email_validation_error:
+        response_body["message"] = email_validation_error
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    user = db.session.execute(db.select(Users).where(and_(Users.email == recovery_email,
+                                                          Users.is_active == True))).scalar()
+    if not user:
+        response_body["message"] = f"Invalid email"
+        response_body["results"] = None
+        return jsonify(response_body), 401
+    reset_token = create_access_token(identity=user.id, expires_delta=timedelta(minutes=30))
+    reset_token_expires_at = datetime.now(timezone.utc) + timedelta(minutes=30)
+    user.reset_token = reset_token
+    user.reset_token_expires_at = reset_token_expires_at
+    db.session.commit()
+    reset_link = f"{backend_url}/reset-password?token={reset_token}"
+    mail_sent = send_mail(
+        user.email, 
+        "Reset your Star Wars account password", 
+        f"Please click here to reset your password: {reset_link}")
+    if mail_sent["results"] == False:
+        response_body["error"] = mail_sent["message"]
+        response_body["message"] = "Something went wrong"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    response_body["message"] = f"If the email exists, check your inbox"
+    response_body["results"] = None
+    return jsonify(response_body), 204
+
+
+@api.route("/reset-password", methods=["POST"])
+def reset_password():
+    response_body = {}
+    data = request.json
+    reset_token = data.get("token")
+    decoded_token = decode_token(reset_token)
+    user_id = decoded_token["sub"]
+    if not user_id:
+        response_body["message"] = f"Invalid credentials"
+        response_body["results"] = None
+        return jsonify(response_body), 401
+    new_password = data.get("new_password")
+    confirm_password = data.get("confirm_password")
+    if not new_password or new_password.strip() == "":
+        response_body["message"] = f"Password is required"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    if new_password != confirm_password:
+        response_body["message"] = f"Passwords do not match"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    password_validation_error = validate_password(new_password)
+    if password_validation_error:
+        response_body["message"] = password_validation_error
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    user = db.session_execute(db.select(Users).where(and_(Users.id == user_id,
+                                                          Users.is_active == True))).scalar()
+    if not user:
+        response_body["message"] = f"User to recover not found"
+        response_body["results"] = None
+        return jsonify(response_body), 404
+    if user.reset_token != reset_token:
+        response_body["message"] = "Invalid reset token"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    if user.reset_token_expires_at <= datetime.now(timezone.utc):
+        response_body["message"] = f"Time out for resetting the password"
+        response_body["results"] = None
+        return jsonify(response_body), 400
+    user.set_password(new_password)
+    user.reset_token = None
+    user.reset_token_expires_at = None
+    db.session.commit()
+    response_body["message"] = f"Password reset successfully"
+    response_body["results"] = None
+    return jsonify(response_body), 204
 
 
 @api.route("/users/<int:user_id>", methods=["GET", "PUT", "DELETE"])

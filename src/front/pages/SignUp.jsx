@@ -13,6 +13,7 @@ export const SignUp = () => {
     const [repeatPassword, setRepeatPassword] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleEmail = event => setEmail(event.target.value);
     const handlePassword = event => setPassword(event.target.value);
@@ -43,14 +44,21 @@ export const SignUp = () => {
         } catch (error) {
             setEmail("");
             setPassword("");
-            setFirstName("");
-            setLastName("");
+            setRepeatPassword("");
             dispatch({
                 type: "SET-NOTIFICATION",
                 payload: error.message 
             });
         }
     };
+
+    const handlePasswordVisibility = (showPassword) => {
+        if (showPassword === false) {
+            setShowPassword(true);
+        } else {
+            setShowPassword(false);
+        }
+    }
 
     const handleCancel = () => {
         navigate("/");
@@ -68,28 +76,46 @@ export const SignUp = () => {
                 <div className="p-5 pt-0">
                     <form onSubmit={handleSubmitSignUp}>
                         <div className="mb-3">
-                            <label htmlFor="signUpEmail" className="mb-2">Email address<span className="text-body-tertiary">*</span></label>
-                            <input type="email" className="form-control rounded-3" id="signUpEmail" placeholder="name@example.com"
+                            <label htmlFor="signUpEmail" className="mb-2">
+                                Email address
+                                <span className="text-body-tertiary">*</span>
+                            </label>
+                            <input type="email" className="form-control" id="signUpEmail" placeholder="name@example.com"
                                 value={email} onChange={handleEmail} required />
                         </div>
                         <div className="mb-3">
-                            <label htmlFor="signUpPassword" className="mb-2">Password<span className="text-body-tertiary">*</span></label>
-                            <input type="password" className="form-control rounded-3" id="signUpPassword" placeholder="Password"
-                                value={password} onChange={handlePassword} required />
+                            <label htmlFor="signUpPassword" className="mb-2">
+                                Password
+                                <span className="text-body-tertiary">*</span>
+                            </label>
+                            <div className="input-group">
+                                <input type={showPassword ? "text" : "password"} className="form-control" id="signUpPassword" placeholder={showPassword ? "Password" : "**********"}
+                                    value={password} onChange={handlePassword} required/>
+                                <button type="button" onClick={() => handlePasswordVisibility(showPassword)} className="input-group-text text-dark bg-tertiary">
+                                    {showPassword ? 
+                                        <i class="fa-solid fa-eye-slash"></i>
+                                        :
+                                        <i class="fa-solid fa-eye"></i>
+                                    }
+                                </button>
+                            </div>
                         </div>
                         <div className="mb-3">
-                            <label htmlFor="signUpRepeatPassword" className="mb-2">Repeat Password<span className="text-body-tertiary">*</span></label>
-                            <input type="password" className="form-control rounded-3" id="signUpRepeatPassword" placeholder="Password"
-                                value={repeatPassword} onChange={handleRepeatPassword} required />
+                            <label htmlFor="signUpRepeatPassword" className="mb-2">
+                                Repeat Password
+                                <span className="text-body-tertiary">*</span>
+                            </label>
+                            <input type="password" className="form-control" id="signUpRepeatPassword" placeholder="**********"
+                                value={repeatPassword} onChange={handleRepeatPassword} required/>
                         </div>
                         <div className="mb-3">
                             <label htmlFor="signUpFirstName" className="mb-2">First Name</label>
-                            <input type="text" className="form-control rounded-3" id="signUpFirstName" placeholder="Your first name"
+                            <input type="text" className="form-control" id="signUpFirstName" placeholder="Your first name"
                                 value={firstName} onChange={handleFirstName} />
                         </div>
                         <div className="mb-4">
                             <label htmlFor="signUpLastName" className="mb-2">Last Name</label>
-                            <input type="text" className="form-control rounded-3" id="signUpLastName" placeholder="Your last name"
+                            <input type="text" className="form-control" id="signUpLastName" placeholder="Your last name"
                                 value={lastName} onChange={handleLastName} />
                         </div>
                         <button className="w-100 my-2 btn btn-lg rounded-3 btn-dark" type="submit">Sign Up</button>
