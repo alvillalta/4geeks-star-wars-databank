@@ -9,8 +9,8 @@ export const Settings = () => {
     const { store, dispatch } = useGlobalReducer();
     const currentUser = store.currentUser
 
-    const [firstName, setFirstName] = useState(currentUser.first_name);
-    const [lastName, setLastName] = useState(currentUser.last_name);
+    const [firstName, setFirstName] = useState(currentUser.first_name || "");
+    const [lastName, setLastName] = useState(currentUser.last_name || "");
 
     const handleFirstName = event => setFirstName(event.target.value);
     const handleLastName = event => setLastName(event.target.value);
@@ -25,12 +25,12 @@ export const Settings = () => {
             const updatedUser = await putUser(currentUser.id, userToPut);
             dispatch({
                 type: "CURRENT-USER",
-                payload: updatedUser.results
+                payload: updatedUser
             });
             navigate("/");
         } catch (error) {
-            setFirstName(currentUser.first_name);
-            setLastName(currentUser.last_name);
+            setFirstName(currentUser.first_name || "");
+            setLastName(currentUser.last_name || "");
             dispatch({
                 type: "SET-NOTIFICATION",
                 payload: error.message 
@@ -47,8 +47,6 @@ export const Settings = () => {
                 navigate("/");
             }
         } catch (error) {
-            setFirstName(currentUser.first_name);
-            setLastName(currentUser.last_name);
             dispatch({
                 type: "SET-NOTIFICATION",
                 payload: error.message 
@@ -81,8 +79,8 @@ export const Settings = () => {
                             <input type="text" className="form-control rounded-3" id="signUpLastName" placeholder="Your last name"
                                 value={lastName} onChange={handleLastName} />
                         </div>
-                        <button className="w-100 my-2 btn btn-lg rounded-3 btn-dark" type="submit">Save</button>
-                        <button onClick={handleDeleteUser} className="w-100 my-2 btn btn-lg rounded-3 btn-danger" type="button">Delete</button>
+                        <button className="w-100 my-2 btn btn-lg rounded-3 btn-dark" type="submit">Save changes</button>
+                        <button onClick={handleDeleteUser} className="w-100 my-2 btn btn-lg rounded-3 btn-danger" type="button">Delete user</button>
                     </form>
                 </div>
             </div>

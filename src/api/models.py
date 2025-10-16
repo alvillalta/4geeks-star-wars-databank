@@ -30,7 +30,6 @@ class Users(db.Model):
     def serialize_basic(self):
         return {"id": self.id,
                 "email": self.email,
-                "is_active": self.is_active,
                 "first_name": self.first_name,
                 "last_name": self.last_name}
     
@@ -53,7 +52,7 @@ class CharacterFavorites(db.Model):
     character_id = db.Column(db.Integer, db.ForeignKey("characters.id"))
     character_to = db.relationship("Characters", foreign_keys=[character_id],
                                    backref=db.backref("character_favorite", lazy="select"))
-    created_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
 
     def serialize(self):
         return {
@@ -101,7 +100,7 @@ class PlanetFavorites(db.Model):
     planet_id = db.Column(db.Integer, db.ForeignKey("planets.id"))
     planet_to = db.relationship("Planets", foreign_keys=[planet_id],
                                  backref=db.backref("planet_favorite", lazy="select"))
-    created_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
 
     def serialize(self):
         return {
@@ -149,7 +148,7 @@ class StarshipFavorites(db.Model):
     starship_id = db.Column(db.Integer, db.ForeignKey("starships.id"))
     starship_to = db.relationship("Starships", foreign_keys=[starship_id],
                                  backref=db.backref("starship_favorite", lazy="select"))
-    created_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
 
     def serialize(self):
         return {

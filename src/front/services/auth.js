@@ -48,6 +48,9 @@ export const logout = () => {
   localStorage.removeItem("character-favorites");
   localStorage.removeItem("planet-favorites");
   localStorage.removeItem("starship-favorites");
+  localStorage.removeItem("characters");
+  localStorage.removeItem("planets");
+  localStorage.removeItem("starships");
   const keys = Object.keys(localStorage);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
@@ -62,6 +65,43 @@ export const logout = () => {
     }
   }
 }
+
+
+export const recoverPassword = async (userToRecover) => {
+  const uri = `${host}/api/recover-password`;
+  const options = {
+    method: "POST",
+    headers: { "Content-type": "application/json" },
+    body: JSON.stringify(userToRecover),
+  };
+  const response = await fetch(uri, options);
+  if (!response.ok) {
+    const backError = await response.json();
+    throw new Error(backError.message || `Error ${response.status}`);
+  }
+  const recoverPasswordOk = await response.json();
+  const results = {
+    responseOk: response.status,
+    message: recoverPasswordOk.message
+  }
+  return results;
+};
+
+
+export const resetPassword = async (passwordToReset) => {
+  const uri = `${host}/api/reset-password`;
+  const options = {
+    method: "POST",
+    headers: { "Content-type": "application/json" },
+    body: JSON.stringify(passwordToReset),
+  };
+  const response = await fetch(uri, options);
+  if (!response.ok) {
+    const backError = await response.json();
+    throw new Error(backError.message || `Error ${response.status}`);
+  }
+  return response.status;
+};
 
 
 export const putUser = async (userId, userToPut) => {
@@ -104,6 +144,9 @@ export const deleteUser = async (userId) => {
   localStorage.removeItem("character-favorites");
   localStorage.removeItem("planet-favorites");
   localStorage.removeItem("starship-favorites");
+  localStorage.removeItem("characters");
+  localStorage.removeItem("planets");
+  localStorage.removeItem("starships");
   const keys = Object.keys(localStorage);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
@@ -116,42 +159,6 @@ export const deleteUser = async (userId) => {
     if (key.includes("starship-details")) {
       localStorage.removeItem(key);
     }
-  }
-  return response.status;
-};
-
-
-export const recoverPassword = async (userToRecover) => {
-  const uri = `${host}/api/recover-password`;
-  const options = {
-    method: "POST",
-    headers: { "Content-type": "application/json" },
-    body: JSON.stringify(userToRecover),
-  };
-  const response = await fetch(uri, options);
-  if (!response.ok) {
-    const backError = await response.json();
-    throw new Error(backError.message || `Error ${response.status}`);
-  }
-  const recoverPasswordOk = await response.json();
-  const results = {
-    responseOk: response.status,
-    message: recoverPasswordOk.message
-  }
-  return results;
-};
-
-export const resetPassword = async (passwordToReset) => {
-  const uri = `${host}/api/reset-password`;
-  const options = {
-    method: "POST",
-    headers: { "Content-type": "application/json" },
-    body: JSON.stringify(passwordToReset),
-  };
-  const response = await fetch(uri, options);
-  if (!response.ok) {
-    const backError = await response.json();
-    throw new Error(backError.message || `Error ${response.status}`);
   }
   return response.status;
 };

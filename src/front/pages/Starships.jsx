@@ -61,21 +61,20 @@ export const Starships = () => {
                 {starships.map((item) => {
                     const isStarshipFavorite = starshipFavorites.find(favorite => favorite.starship_id === item.id);
                     return (
-                        <div className="col" key={item.id}>
-                            <div className="card mb-3">
-                                        <img src={`https://raw.githubusercontent.com/tbone849/star-wars-guide/refs/heads/master/build/assets/img/starships/${item.id}.jpg`}
-                                            onError={handleImageError} className="css-card-image card-img-top" />
-                                <div className="col-md-10 d-flex align-items-start">
-                                    <div className="card-body text-start">
-                                        <h5 className="card-title">{item.name}</h5>
-                                        <div className="d-flex justify-content-start gap-3">
-                                            <button onClick={() => handleStarshipDetails(item.id)} className="btn btn-dark">
-                                                Details
-                                            </button>
-                                            <button onClick={() => handleStarshipFavorites(item.id, isStarshipFavorite)} type="button" className="p-0 border-0 bg-transparent">
-                                                <i className={`fa-${isStarshipFavorite ? "solid" : "regular"} fa-xl fa-heart`}></i></button> 
-                                        </div>
-                                    </div>
+                        <div className="col d-flex" key={item.id}>
+                            <div className="card d-flex flex-fill mb-3">
+                                <img src={`https://raw.githubusercontent.com/tbone849/star-wars-guide/refs/heads/master/build/assets/img/starships/${item.id}.jpg`}
+                                    onError={handleImageError} className="css-card-image" />
+                                <div className="card-body">
+                                    <h5 className="card-title text-start mb-0">{item.name}</h5>
+                                </div>
+                                <div className="card-footer d-flex justify-content-start gap-3 bg-transparent border-0 pt-0 pb-3 ps-3">
+                                    <button onClick={() => handleStarshipDetails(item.id)} className="btn btn-dark">
+                                        Details
+                                    </button>
+                                    <button onClick={() => handleStarshipFavorites(item.id, isStarshipFavorite)} type="button" className="p-0 border-0 bg-transparent">
+                                        <i className={`fa-${isStarshipFavorite ? "solid" : "regular"} fa-xl fa-heart`}></i>
+                                    </button> 
                                 </div>
                             </div>
                         </div>

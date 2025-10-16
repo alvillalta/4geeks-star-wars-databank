@@ -27,13 +27,14 @@ smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
 smtp_port = int(os.getenv("SMTP_PORT", 465))
 
 
-
 api = Blueprint("api", __name__)
-""" CORS(api)  # Allow CORS requests to this API """
-CORS(api, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+CORS(api)  # Allow CORS requests to this API
+
 
 def validate_email(email):
-        if not len(email) <= 100:
+        if not isinstance(email, str):
+            return "Invalid email"
+        elif not len(email) <= 100:
             return "Email must be less than 100 characters"
         elif any(character.isspace() for character in email):
             return "Email must not contain any blank space"
@@ -41,10 +42,11 @@ def validate_email(email):
             return "Use a valid email"
         else: return None
 
-
 def validate_password(password):
         symbols = "@$!%-*?&"
-        if not 8 <= len(password):
+        if not isinstance(password, str):
+            return "Invalid password"
+        elif not 8 <= len(password):
             return "Password must be more than 8 characters"
         elif not len(password) <= 64:
             return "Password must be less than 64 characters"
@@ -60,6 +62,12 @@ def validate_password(password):
             return "Password must contain at least one of these symbols: @$!%-*?&"
         else: return None
 
+def validate_name(name):
+        if not isinstance(name, str):
+            return "name must be a valid text"
+        elif not len(name) <= 50:
+            return "name must be less than 50 characters"
+        else: return None
 
 def send_mail(to_email, subject, body):
     message = EmailMessage()
@@ -120,13 +128,33 @@ def signup():
         response_body["results"] = None
         return jsonify(response_body), 400
     user.password = user.set_password(plain_password)
+    first_name = user_to_post.get("first_name", None)
+    if not first_name or first_name.strip() == "":
+        user.first_name = None
+    if first_name:
+        name_validation_error = validate_name(first_name)
+        if name_validation_error:
+            response_body["message"] = f"First {name_validation_error}"
+            response_body["results"] = None
+            return jsonify(response_body), 400
+        user.first_name = first_name
+    last_name = user_to_post.get("last_name", None)
+    if not last_name or last_name.strip() == "":
+        user.last_name = None
+    if last_name:
+        name_validation_error = validate_name(last_name)
+        if name_validation_error:
+            response_body["message"] = f"Last {name_validation_error}"
+            response_body["results"] = None
+            return jsonify(response_body), 400
+        user.last_name = last_name   
     user.is_active = True
-    user.first_name = user_to_post.get("first_name", None)        
-    user.last_name = user_to_post.get("last_name", None)
     db.session.add(user)
     db.session.commit()
-    claims = {"user_id": user.id, "email": user.email}
-    access_token = create_access_token(identity=user.id, additional_claims=claims, expires_delta=timedelta(minutes=60))
+    claims = {
+        "user_id": user.id, 
+        "email": user.email}
+    access_token = create_access_token(identity=f"{user.id}", additional_claims=claims, expires_delta=timedelta(minutes=60))
     response_body["message"] = f"User {user.id} posted successfully"
     response_body["results"] = user.serialize_basic()
     response_body["access_token"] = access_token
@@ -159,7 +187,9 @@ def login():
         response_body["message"] = f"Invalid credentials"
         response_body["results"] = None
         return jsonify(response_body), 401
-    claims = {"user_id": user.id, "email": user.email}
+    claims = {
+        "user_id": user.id, 
+        "email": user.email}
     access_token = create_access_token(identity=f"{user.id}", additional_claims=claims, expires_delta=timedelta(minutes=60))
     response_body["message"] = f"User {user.email} logged successfully"
     response_body["results"] = user.serialize_basic()
@@ -211,16 +241,9 @@ def recover_password():
 @api.route("/reset-password", methods=["POST"])
 def reset_password():
     response_body = {}
-    print("raw_data", request.data)
     data = request.json
-    print("Parsed data:", data)
     reset_token = data.get("token")
-    try:
-        decoded_token = decode_token(reset_token)
-        print("Decoded token:", decoded_token)
-    except Exception as e:
-        print("Token decode error:", e)
-        return jsonify({"message": f"Invalid or expired token: {str(e)}", "results": None}), 400
+    decoded_token = decode_token(reset_token)
     user_id = decoded_token["sub"]
     if not user_id:
         response_body["message"] = f"Invalid credentials"
@@ -247,12 +270,10 @@ def reset_password():
         response_body["message"] = f"User to recover not found"
         response_body["results"] = None
         return jsonify(response_body), 404
-    print("Token matches:", user.reset_token == reset_token)
     if user.reset_token != reset_token:
         response_body["message"] = "Invalid reset token"
         response_body["results"] = None
         return jsonify(response_body), 400
-    print("Token expires at:", user.reset_token_expires_at, "Now:", datetime.now(timezone.utc))
     if user.reset_token_expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
         response_body["message"] = f"Time out for resetting the password"
         response_body["results"] = None
@@ -287,9 +308,27 @@ def handle_user(user_id):
             response_body["message"] = f"User {token_user_id} is not allowed to put {user_id}"
             response_body["results"] = None
             return jsonify(response_body), 403
-        data = request.json
-        user_to_handle.first_name = data.get("first_name", user_to_handle.first_name)
-        user_to_handle.last_name = data.get("last_name", user_to_handle.last_name)
+        user_to_put = request.json
+        first_name = user_to_put.get("first_name", None)
+        if not first_name or first_name.strip() == "":
+            user_to_handle.first_name = None
+        if first_name:
+            name_validation_error = validate_name(first_name)
+            if name_validation_error:
+                response_body["message"] = f"First {name_validation_error}"
+                response_body["results"] = None
+                return jsonify(response_body), 400
+            user_to_handle.first_name = first_name
+        last_name = user_to_put.get("last_name", None)
+        if not last_name or last_name.strip() == "":
+            user_to_handle.last_name = None
+        if last_name:
+            name_validation_error = validate_name(last_name)
+            if name_validation_error:
+                response_body["message"] = f"Last {name_validation_error}"
+                response_body["results"] = None
+                return jsonify(response_body), 400
+            user_to_handle.last_name = last_name
         db.session.commit()
         results = user_to_handle.serialize_basic()
         response_body["message"] = f"User {user_to_handle.id} put successfully"
@@ -317,30 +356,29 @@ def handle_favorites(user_id):
         response_body["results"] = None
         return jsonify(response_body), 404
     if request.method == "GET":
-        print("Antes de llamar a los favoritos de db")
         character_favorites = db.session.execute(db.select(CharacterFavorites).where(CharacterFavorites.user_id == user_id).order_by(asc(CharacterFavorites.created_at))).scalars()
         planet_favorites = db.session.execute(db.select(PlanetFavorites).where(PlanetFavorites.user_id == user_id).order_by(asc(PlanetFavorites.created_at))).scalars()
         starship_favorites = db.session.execute(db.select(StarshipFavorites).where(StarshipFavorites.user_id == user_id).order_by(asc(StarshipFavorites.created_at))).scalars()
         if not character_favorites and not planet_favorites and not starship_favorites:
             response_body["message"] = f"User {user_id} has no favorites"
-            response_body["character_favorites"] = []
-            response_body["planet_favorites"] = []
-            response_body["starship_favorites"] = []
+            response_body["characterFavorites"] = []
+            response_body["planetFavorites"] = []
+            response_body["starshipFavorites"] = []
             return jsonify(response_body), 200
         character_results = [row.serialize() for row in character_favorites] if character_favorites else []
         planet_results = [row.serialize() for row in planet_favorites] if planet_favorites else []
         starship_results = [row.serialize() for row in starship_favorites] if starship_favorites else []
         response_body["message"] = f"User {user_id} favorites got successfully"
-        response_body["character_favorites"] = character_results
-        response_body["planet_favorites"] = planet_results
-        response_body["starship_favorites"] = starship_results
+        response_body["characterFavorites"] = character_results
+        response_body["planetFavorites"] = planet_results
+        response_body["starshipFavorites"] = starship_results
         return jsonify(response_body), 200
 
 
 @api.route("/characters")
 def handle_characters():
     response_body = {}
-    characters = db.session.execute(db.select(Characters)).scalars().all()
+    characters = db.session.execute(db.select(Characters).order_by(Characters.id)).scalars().all()
     if not characters:
         characters_url = "https://www.swapi.tech/api/people"
         while len(characters) < 20:
@@ -356,7 +394,7 @@ def handle_characters():
                 new_character.name = row["name"]
                 db.session.add(new_character)
             db.session.commit()
-            characters = db.session.execute(db.select(Characters)).scalars().all()
+            characters = db.session.execute(db.select(Characters).order_by(Characters.id)).scalars().all()
             characters_url = data.get("next")
             if not characters_url:
                 response_body["message"] = f"Error getting results from external server"
@@ -408,7 +446,7 @@ def handle_character_details(character_id):
         return jsonify(response_body), 200
 
 
-@api.route("characters/<int:character_id>", methods=["POST", "DELETE"])
+@api.route("/characters/<int:character_id>", methods=["POST", "DELETE"])
 @jwt_required()
 def handle_favorite_characters(character_id):
     response_body = {}
@@ -429,6 +467,7 @@ def handle_favorite_characters(character_id):
         favorite_character = CharacterFavorites()
         favorite_character.user_id = token_user_id
         favorite_character.character_id = character_id
+        favorite_character.created_at = datetime.now(timezone.utc)
         db.session.add(favorite_character)
         db.session.commit()
         results = favorite_character.serialize()
@@ -450,7 +489,7 @@ def handle_favorite_characters(character_id):
 @api.route("/planets")
 def handle_planets():
     response_body = {}
-    planets = db.session.execute(db.select(Planets)).scalars().all()
+    planets = db.session.execute(db.select(Planets).order_by(Planets.id)).scalars().all()
     if not planets:
         planets_url = "https://www.swapi.tech/api/planets"
         while len(planets) < 20:
@@ -466,7 +505,7 @@ def handle_planets():
                 new_planet.name = row["name"]
                 db.session.add(new_planet)
             db.session.commit()
-            planets = db.session.execute(db.select(Planets)).scalars().all()
+            planets = db.session.execute(db.select(Planets).order_by(Planets.id)).scalars().all()
             planets_url = data.get("next")
             if not planets_url:
                 response_body["message"] = f"Error getting results from external server"
@@ -518,7 +557,7 @@ def handle_planet_details(planet_id):
         return jsonify(response_body), 200
 
 
-@api.route("planets/<int:planet_id>", methods=["POST", "DELETE"])
+@api.route("/planets/<int:planet_id>", methods=["POST", "DELETE"])
 @jwt_required()
 def handle_favorite_planets(planet_id):
     response_body = {}
@@ -539,6 +578,7 @@ def handle_favorite_planets(planet_id):
         favorite_planet = PlanetFavorites()
         favorite_planet.user_id = token_user_id
         favorite_planet.planet_id = planet_id
+        favorite_planet.created_at = datetime.now(timezone.utc)
         db.session.add(favorite_planet)
         db.session.commit()
         results = favorite_planet.serialize()
@@ -560,7 +600,7 @@ def handle_favorite_planets(planet_id):
 @api.route("/starships")
 def handle_starships():
     response_body = {}
-    starships = db.session.execute(db.select(Starships)).scalars().all()
+    starships = db.session.execute(db.select(Starships).order_by(Starships.id)).scalars().all()
     if not starships:
         starships_url = "https://www.swapi.tech/api/starships"
         while len(starships) < 20:
@@ -576,7 +616,7 @@ def handle_starships():
                 new_starship.name = row["name"]
                 db.session.add(new_starship)
             db.session.commit()
-            starships = db.session.execute(db.select(Starships)).scalars().all()
+            starships = db.session.execute(db.select(Starships).order_by(Starships.id)).scalars().all()
             starships_url = data.get("next")
             if not starships_url:
                 response_body["message"] = f"Error getting results from external server"
@@ -631,7 +671,7 @@ def handle_starship_details(starship_id):
         return jsonify(response_body), 200
 
 
-@api.route("starships/<int:starship_id>", methods=["POST", "DELETE"])
+@api.route("/starships/<int:starship_id>", methods=["POST", "DELETE"])
 @jwt_required()
 def handle_favorite_starships(starship_id):
     response_body = {}
@@ -652,6 +692,7 @@ def handle_favorite_starships(starship_id):
         favorite_starship = StarshipFavorites()
         favorite_starship.user_id = token_user_id
         favorite_starship.starship_id = starship_id
+        favorite_starship.created_at = datetime.now(timezone.utc)
         db.session.add(favorite_starship)
         db.session.commit()
         results = favorite_starship.serialize()

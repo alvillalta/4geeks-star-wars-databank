@@ -3,7 +3,6 @@ const host = import.meta.env.VITE_BACKEND_URL;
 
 export const getFavorites = async (userId) => {
   const uri = `${host}/api/users/${userId}/favorites`;
-  console.log("Aquí sí que entra");
   const options = { 
     method: "GET",
     headers: {
@@ -19,19 +18,18 @@ export const getFavorites = async (userId) => {
   const planetFavoritesStorage = localStorage.getItem(`planet-favorites`);
   const starshipFavoritesStorage = localStorage.getItem(`starship-favorites`);
   if (!characterFavoritesStorage && !planetFavoritesStorage && !starshipFavoritesStorage) {
-    console.log("Token enviado:", localStorage.getItem("token"));
     const response = await fetch(uri, options);
     if (!response.ok) {
       const backError = await response.json();
       throw new Error(backError.message || `Error ${response.status}`);
     }
     const backData = await response.json();
-    localStorage.setItem(`character-favorites`, JSON.stringify(backData.character_favorites));
-    localStorage.setItem(`planet-favorites`, JSON.stringify(backData.planet_favorites));
-    localStorage.setItem(`starship-favorites`, JSON.stringify(backData.starship_favorites));
-    favorites.characterFavorites = backData.character_favorites;
-    favorites.planetFavorites = backData.planet_favorites;
-    favorites.starshipFavorites = backData.starship_favorites;
+    localStorage.setItem(`character-favorites`, JSON.stringify(backData.characterFavorites));
+    localStorage.setItem(`planet-favorites`, JSON.stringify(backData.planetFavorites));
+    localStorage.setItem(`starship-favorites`, JSON.stringify(backData.starshipFavorites));
+    favorites.characterFavorites = backData.characterFavorites;
+    favorites.planetFavorites = backData.planetFavorites;
+    favorites.starshipFavorites = backData.starshipFavorites;
     return favorites;
   };
   if (!characterFavoritesStorage || !planetFavoritesStorage || !starshipFavoritesStorage) {

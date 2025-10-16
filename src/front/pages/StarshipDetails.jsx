@@ -77,20 +77,20 @@ export const StarshipDetails = () => {
                     <div className="col-lg-8">
                         <h2 className="card-title py-3 ps-3">{starshipDetails.name}</h2>
                         <ul className="list-group">
-                            <li className="list-group-item"><b>Consumables:</b>{` ${starshipDetails.consumables}`}</li>
-                            <li className="list-group-item"><b>Cargo capacity:</b>{` ${starshipDetails.cargo_capacity}`}</li>
-                            <li className="list-group-item"><b>Passengers:</b>{` ${starshipDetails.passengers}`}</li>
-                            <li className="list-group-item"><b>Max atmospheric speed:</b>{` ${starshipDetails.max_atmosphering_speed}`}</li>
-                            <li className="list-group-item"><b>Crew:</b>{` ${starshipDetails.crew}`}</li>
-                            <li className="list-group-item"><b>Length:</b>{` ${starshipDetails.length}`}</li>
-                            <li className="list-group-item"><b>Model:</b>{` ${starshipDetails.model}`}</li>
-                            <li className="list-group-item"><b>Cost in credits:</b>{` ${starshipDetails.cost_in_credits}`}</li>
-                            <li className="list-group-item"><b>Manufacturer:</b>{` ${starshipDetails.manufacturer}`}</li>
-                            <li className="list-group-item"><b>Starship class:</b>{` ${starshipDetails.starship_class}`}</li>
-                            <li className="list-group-item"><b>Hyperdrive rating:</b>{` ${starshipDetails.hyperdrive_rating}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Consumables:</b>{` ${starshipDetails.consumables}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Cargo capacity:</b>{` ${starshipDetails.cargo_capacity}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Passengers:</b>{` ${starshipDetails.passengers}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Max atmospheric speed:</b>{` ${starshipDetails.max_atmosphering_speed}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Crew:</b>{` ${starshipDetails.crew}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Length:</b>{` ${starshipDetails.length}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Model:</b>{` ${starshipDetails.model}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Cost in credits:</b>{` ${starshipDetails.cost_in_credits}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Manufacturer:</b>{` ${starshipDetails.manufacturer}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Starship class:</b>{` ${starshipDetails.starship_class}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Hyperdrive rating:</b>{` ${starshipDetails.hyperdrive_rating}`}</li>
                         </ul>
                         <div className="d-flex justify-content-start gap-3 py-3 ps-3">
-                            <button onClick={handleBack} className="btn btn-secondary ">Back</button>
+                            <button onClick={handleBack} className="btn btn-dark">Back</button>
                             <button onClick={() => handleStarshipFavorites(starshipIdInt, isStarshipFavorite)}
                                 type="button" className="p-0 border-0 bg-transparent">
                                 <i className={`fa-${isStarshipFavorite ? "solid" : "regular"} fa-xl fa-heart`}></i>

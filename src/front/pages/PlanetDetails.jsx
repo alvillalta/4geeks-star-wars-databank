@@ -77,16 +77,16 @@ export const PlanetDetails = () => {
                     <div className="col-lg-8">
                         <h2 className="card-title py-3 ps-3">{planetDetails.name}</h2>
                         <ul className="list-group">
-                            <li className="list-group-item"><b>Climate:</b>{` ${planetDetails.climate}`}</li>
-                            <li className="list-group-item"><b>Diameter:</b>{` ${planetDetails.diameter}`}</li>
-                            <li className="list-group-item"><b>Rotation Period:</b>{` ${planetDetails.rotation_period}`}</li>
-                            <li className="list-group-item"><b>Terrain:</b>{` ${planetDetails.terrain}`}</li>
-                            <li className="list-group-item"><b>Gravity:</b>{` ${planetDetails.gravity}`}</li>
-                            <li className="list-group-item"><b>Orbital Period:</b>{` ${planetDetails.orbital_period}`}</li>
-                            <li className="list-group-item"><b>Population:</b>{` ${planetDetails.population}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Climate:</b>{` ${planetDetails.climate}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Diameter:</b>{` ${planetDetails.diameter}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Rotation Period:</b>{` ${planetDetails.rotation_period}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Terrain:</b>{` ${planetDetails.terrain}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Gravity:</b>{` ${planetDetails.gravity}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Orbital Period:</b>{` ${planetDetails.orbital_period}`}</li>
+                            <li className="list-group-item border-start-0 border-end-0"><b>Population:</b>{` ${planetDetails.population}`}</li>
                         </ul>
                         <div className="d-flex justify-content-start gap-3 py-3 ps-3">
-                            <button onClick={handleBack} className="btn btn-secondary">Back</button>
+                            <button onClick={handleBack} className="btn btn-dark">Back</button>
                             <button onClick={() => handlePlanetFavorites(planetIdInt, isPlanetFavorite)}
                                 type="button" className="p-0 border-0 bg-transparent">
                                 <i className={`fa-${isPlanetFavorite ? "solid" : "regular"} fa-xl fa-heart`}></i>
