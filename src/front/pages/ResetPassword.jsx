@@ -49,7 +49,7 @@ export const ResetPassword = () => {
 
     return (
         <div className="d-flex justify-content-center my-4">
-            <div className="col-10 col-md-6 col-lg-4 rounded-4 shadow">
+            <div className="col-10 col-md-6 col-lg-4 rounded-4 bg-white shadow">
                 <div className="d-flex align-items-end justify-content-start p-5 pb-4 border-bottom-0">
                     <h1 className="fw-bold mb-0 fs-2">Reset Password</h1>
                 </div>

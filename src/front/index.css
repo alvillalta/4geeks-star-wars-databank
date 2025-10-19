@@ -1,17 +1,19 @@
-.offcanvas-end {
-    max-width: 50%;
-}
-
-.css-logo-negative-space {
-    width: 11rem;
+body {
+    background-color: #f8f9fa;
 }
 
 .css-navbar-logo {
     height: 2.5rem;
 }
 
-.css-toggle-focus {
-    box-shadow: 0 0 0 0.25rem black;
+.css-logo-negative-space {
+    width: 11rem;
+}
+
+.css-home-image {
+    object-fit: cover;
+    width: 100%;
+    min-height: 42rem;
 }
 
 .css-card-image {
@@ -25,11 +27,41 @@
     width: 100%;
 }
 
+.css-z-index-1055 {
+    z-index: 1055;
+}
+
 .css-z-index-2000 {
     z-index: 2000;
 }
 
-.css-opacity {
+.css-opacity-06 {
     opacity: 0.6;
-    z-index: 1250;
+    transition: opacity 0.3s ease;
+}
+
+.css-opacity-1 {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.css-opacity-closing {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    visibility: visible;
+}
+
+.offcanvas.show {
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+}
+
+.offcanvas.closing {
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    visibility: visible;
+}
+
+.offcanvas-end {
+    max-width: 50%;
 }

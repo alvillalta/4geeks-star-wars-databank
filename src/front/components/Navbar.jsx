@@ -7,6 +7,7 @@ import { logout } from "../services/auth.js";
 export const Navbar = () => {
 	const navigate = useNavigate();
 	const [isToggled, setIsToggled] = useState(false);
+	const [isClosing, setIsClosing] = useState(false);
 	const { store, dispatch } = useGlobalReducer();
 	const isLogged = store.login.isLogged;
 	const characterFavorites = store.characterFavorites;
@@ -19,7 +20,11 @@ export const Navbar = () => {
 			setIsToggled(true);
 		}
 		else {
-			setIsToggled(false);
+			setIsClosing(true);
+			setTimeout(() => {
+				setIsClosing(false);
+				setIsToggled(false);
+			}, 300);
 		}
 	}
 
@@ -55,17 +60,20 @@ export const Navbar = () => {
 	return (
 		<nav className="navbar navbar-light bg-light">
 			<div className="container d-flex justify-content-between align-items-center my-2">
-				<div className="css-logo-negative-space">
-					<Link to="/">
-						<img src={starWarsLogo} className="css-navbar-logo img-fluid" />
-					</Link>
-				</div>
-				<div className="d-flex d-lg-none px-2">
-					<button type="button" onClick={showToggler} className={`navbar-toggler css-z-index-2000`}
-						data-bs-toggle="offcanvas" data-bs-target="#offcanvas" aria-expanded={isToggled ? "true" : "false"}>
+				<div className="d-flex d-lg-none px-2 pt-3 mt-4">
+					<div className="position-absolute top-0 start-0 my-3 ms-4">
+						<Link to="/">
+							<img src={starWarsLogo} className="css-navbar-logo img-fluid" />
+						</Link>
+					</div>
+					<button type="button" onClick={showToggler} className="navbar-toggler position-absolute top-0 end-0 my-3 me-4 shadow-none">
 						<span className="navbar-toggler-icon"></span>
 					</button>
-					<div className={`offcanvas offcanvas-end ${isToggled ? "show" : ""} justify-content-start align-items-end gap-3 px-4`}>
+					<div id="offcanvas" className={`offcanvas offcanvas-end css-z-index-2000 justify-content-start align-items-end gap-3 px-4
+					${isToggled ? `${isClosing ? "closing" : "show"}` : ""}`}>
+						<button type="button" onClick={showToggler} className="navbar-toggler css-z-index-2000 position-absolute top-0 end-0 my-3 me-4 border-dark border-5 border-opacity-75 rounded-3 shadow-none">
+							<span className="navbar-toggler-icon"></span>
+						</button>
 						<div className="d-flex flex-column align-items-end gap-3 mt-5 pt-5">
 							<Link to="/characters" onClick={showToggler} className="nav-link text-decoration-none">
 								<span className="h5">Characters</span>
@@ -80,7 +88,7 @@ export const Navbar = () => {
 								<span className="h5">Contacts</span>
 							</Link>
 							<button type="button" onClick={() => { handleFavorites(); showToggler(); }}
-								className={`${isLogged ? `btn-${favoritesLength > 0 ? "dark" : "secondary"}` : "d-none"} btn position-relative`}>
+							className={`${isLogged ? `btn-${favoritesLength > 0 ? "dark" : "secondary"}` : "d-none"} btn position-relative`}>
 								{favoritesLength > 0 ?
 									<span>
 										Favorites
@@ -104,22 +112,31 @@ export const Navbar = () => {
 							</button>
 						</div>
 					</div>
+					{isToggled || isClosing ? 
+						<div onClick={showToggler} className={`${isClosing ? "css-opacity-closing" : "css-opacity-06"} css-z-index-1055 position-fixed top-0 start-0 w-100 h-100 bg-dark`}></div>
+						: 
+						<div className="d-none"></div>
+					}
+				</div>
+				<div className="d-none d-lg-flex css-logo-negative-space">
+					<Link to="/">
+						<img src={starWarsLogo} className="css-navbar-logo img-fluid" />
+					</Link>
 				</div>
 				<div className="d-none d-lg-flex align-items-center gap-3">
-					<Link to="/characters" onClick={showToggler} className="nav-link text-decoration-none">
+					<Link to="/characters" className="nav-link text-decoration-none">
 						<span className="h5">Characters</span>
 					</Link>
-					<Link to="/planets" onClick={showToggler} className="nav-link text-decoration-none">
+					<Link to="/planets" className="nav-link text-decoration-none">
 						<span className="h5">Planets</span>
 					</Link>
-					<Link to="/starships" onClick={showToggler} className="nav-link text-decoration-none">
+					<Link to="/starships" className="nav-link text-decoration-none">
 						<span className="h5">Starships</span>
 					</Link>
-					<Link to="/contacts" onClick={showToggler} className="d-none nav-link text-decoration-none">
+					<Link to="/contacts" className="d-none nav-link text-decoration-none">
 						<span className="h5">Contacts</span>
 					</Link>
-					<button type="button" onClick={() => { handleFavorites(); showToggler(); }}
-						className={`${isLogged ? `btn-${favoritesLength > 0 ? "dark" : "secondary"}` : "d-none"} btn position-relative`}>
+					<button type="button" onClick={handleFavorites} className={`${isLogged ? `btn-${favoritesLength > 0 ? "dark" : "secondary"}` : "d-none"} btn position-relative`}>
 						{favoritesLength > 0 ?
 							<span>
 								Favorites

@@ -41,7 +41,7 @@ export const RecoverPassword = () => {
 
     return (
         <div className="d-flex justify-content-center my-4">
-            <div className="col-10 col-md-6 col-lg-4 rounded-4 shadow">
+            <div className="col-10 col-md-6 col-lg-4 rounded-4 bg-white shadow">
                 <div className="d-flex align-items-end justify-content-between p-5 pb-4 border-bottom-0">
                     <h1 className="fw-bold mb-0 fs-2">Recover Password</h1>
                     <button onClick={handleCancel} type="button" className="border-0 bg-transparent text-dark">

@@ -88,7 +88,7 @@ def send_mail(to_email, subject, body):
         mail_sent["message"] = f"Error sending mail: {error}"
         mail_sent["results"] = False
         return mail_sent
-        
+
 
 @api.route("/signup", methods=["POST"])
 def signup():
@@ -217,7 +217,7 @@ def recover_password():
     if not user:
         response_body["message"] = f"Invalid email"
         response_body["results"] = None
-        return jsonify(response_body), 401
+        return jsonify(response_body), 404
     reset_token = create_access_token(identity=f"{user.id}", expires_delta=timedelta(minutes=30))
     reset_token_expires_at = datetime.now(timezone.utc) + timedelta(minutes=30)
     user.reset_token = reset_token
@@ -273,7 +273,7 @@ def reset_password():
     if user.reset_token != reset_token:
         response_body["message"] = "Invalid reset token"
         response_body["results"] = None
-        return jsonify(response_body), 400
+        return jsonify(response_body), 401
     if user.reset_token_expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
         response_body["message"] = f"Time out for resetting the password"
         response_body["results"] = None
@@ -399,7 +399,7 @@ def handle_characters():
             if not characters_url:
                 response_body["message"] = f"Error getting results from external server"
                 response_body["results"] = None
-                return jsonify(response_body), 404
+                return jsonify(response_body), 502
         if not characters:
             response_body["message"] = f"Error getting characters"
             response_body["results"] = None
@@ -438,7 +438,7 @@ def handle_character_details(character_id):
         if not character.height:
             response_body["message"] = f"Error getting character {character_id}"
             response_body["results"] = None
-            return jsonify(response_body), 404
+            return jsonify(response_body), 502
     if request.method == "GET":      
         results = character.serialize()
         response_body["message"] = f"Character {character_id} got successfully"
@@ -510,7 +510,7 @@ def handle_planets():
             if not planets_url:
                 response_body["message"] = f"Error getting results from external server"
                 response_body["results"] = None
-                return jsonify(response_body), 404
+                return jsonify(response_body), 502
         if not planets:
             response_body["message"] = f"Error getting planets"
             response_body["results"] = None
@@ -549,7 +549,7 @@ def handle_planet_details(planet_id):
         if not planet.diameter:
             response_body["message"] = f"Error getting planet {planet_id}"
             response_body["results"] = None
-            return jsonify(response_body), 404
+            return jsonify(response_body), 502
     if request.method == "GET":      
         results = planet.serialize()
         response_body["message"] = f"Planet {planet_id} got successfully"
@@ -621,7 +621,7 @@ def handle_starships():
             if not starships_url:
                 response_body["message"] = f"Error getting results from external server"
                 response_body["results"] = None
-                return jsonify(response_body), 404
+                return jsonify(response_body), 502
         if not starships:
             response_body["message"] = f"Error getting starships"
             response_body["results"] = None
@@ -663,7 +663,7 @@ def handle_starship_details(starship_id):
         if not starship.length:
             response_body["message"] = f"Error getting starship {starship_id}"
             response_body["results"] = None
-            return jsonify(response_body), 404
+            return jsonify(response_body), 502
     if request.method == "GET":      
         results = starship.serialize()
         response_body["message"] = f"Starship {starship_id} got successfully"
