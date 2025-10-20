@@ -98,7 +98,7 @@ export const Favorites = () => {
     return (
         <div className="container text-center my-4">
             <div className="d-flex justify-content-start align-items-center gap-3 mb-4">
-                <div className="btn-group" role="group">
+                <div className="btn-group bg-white" role="group">
                     <input type="radio" className="btn-check" name="btnradio" id="btnAllFavorites" autocomplete="off"
                         onChange={handleFilters} value="All" checked={filter === "All"} />
                     <label className="btn btn-outline-dark" htmlFor="btnAllFavorites">
