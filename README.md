@@ -24,7 +24,7 @@ pipenv install
 pipenv run start
 ```
 
-Create a .env file based on the .env.example
+### Create a .env file
 
 ---
 
