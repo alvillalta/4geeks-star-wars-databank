@@ -24,6 +24,8 @@ pipenv install
 pipenv run start
 ```
 
+Create a .env file based on the .env.example
+
 ---
 
 ## Environment Configuration
@@ -34,28 +36,62 @@ These variables are not included in the repository, as they depend on your local
 Here is a minimal example of what should it look like:
 
 ```env
-\# Back-End Variables
+# Back-End Variables
 DATABASE_URL=postgres://gitpod:postgres@localhost:5432/example
 FLASK_APP_KEY="any key works"
 FLASK_APP=src/app.py
 FLASK_DEBUG=1
 DEBUG=TRUE
 
-\# Front-End Variables
+# Front-End Variables
 VITE_BASENAME=/
 VITE_BACKEND_URL=your_database_url
 
-\# JWT Flask Extended
+# JWT Flask Extended
 JWT_SECRET_KEY=your_jwt_secret
 
-\# smtplib
+# smtplib
 EMAIL_USER=your_email
-EMAIL_PASS=your_email_application_password \# It's not your conventional password
+EMAIL_PASS=your_email_application_password # It's not your conventional password
 SMTP_SERVER=smtp.example.com
 SMTP_PORT=465
 ```
 
 ---
+
+## Backend Setup & Migrations
+
+Here's how to manage the backend API
+
+### 1. Generate new migrations
+*(Skip this step if you haven’t made changes to `./src/api/models.py`)*
+
+```bash
+pipenv run migrate
+```
+
+### 2. Apply migrations
+
+```bash
+pipenv run upgrade
+```
+
+### 3. Start the backend server
+
+```bash
+pipenv run start
+```
+
+### 4. Reset all with the newest database configuration
+*(Optional)*
+
+
+```bash
+pipenv run reset_db
+```
+
+---
+
 
 ## Usage
 
@@ -68,32 +104,29 @@ Once both servers are running:
 
 ## Features
 
-- Secure authentication system using **JWT** and **Bcrypt**
-- Automated password recovery using **smtplib**
-- Flask REST API integrated with **swapi.tech**
-- Optimized database queries with SQLAlchemy
-- Persistent user state with `localStorage` (favorites + sessions)
-- Fully responsive UI built with **React** and **Bootstrap**
-- Cross-device consistent UX
+- Implemented secure authentication with **JWT** and **Bcrypt**, and **smtplib** for automated password recovery.
+- Integrated a Flask REST API with third-party services (**swapi.tech**), optimizing database query performance.
+- Managed persistent state and `localStorage` for user favorites and sessions.
+- Developed a fully responsive interface with **React** and **Bootstrap**, ensuring consistent UX across devices.
 
 ---
 
-## 📁 Project Structure (Simplified)
+## Project Structure
 
 ```
-src/front/     → React app (frontend)
-src/api/       → Flask API with SQLAlchemy (backend)
+src/front/     Front-end
+src/api/       Back-end
 ```
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome!  
 Please feel free to open an issue or submit a pull request.
 
 ---
 
-## 📄 License
+## License
 
-MIT License (or specify your preferred license here).
+MIT License
