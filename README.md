@@ -2,6 +2,39 @@
 
 A responsive Star Wars databank application that allows users to explore the film universe, manage their favorites, and authenticate securely.
 
+## Features
+
+- Implemented secure authentication with **JWT** and **Bcrypt**, and **smtplib** for automated password recovery.
+- Integrated a Flask REST API with third-party services (**swapi.tech**), optimizing database query performance.
+- Managed persistent state and `localStorage` for user favorites and sessions.
+- Developed a fully responsive interface with **React** and **Bootstrap**, ensuring consistent UX across devices.
+
+---
+
+## Demo
+
+This demo shows the main application behavior of **Star Wars Databank**.
+
+### Preview
+
+![Navigation](src/front/assets/demo/star-wars-databank-gif.gif)
+
+### Key Screens
+
+| Home |
+|------|
+|![Home](src/front/assets/demo/1.png)|
+
+| Login | User | Content |
+|------|-------------------|-----------|
+| ![Login](src/front/assets/demo/2.png) | ![User](src/front/assets/demo/3.png) | ![Content](src/front/assets/demo/4.png) |
+
+| Content Details | Favorites | Favorites Filter |
+|------|-------------------|-----------|
+| ![Content Details](src/front/assets/demo/5.png) | ![Favorites](src/front/assets/demo/6.png) | ![Favorites Filter](src/front/assets/demo/7.png) |
+
+---
+
 ## Tech Stack
 
 **Frontend:** React, Bootstrap  
@@ -99,15 +132,6 @@ Once both servers are running:
 
 - The React application will start at port `http://localhost:3000`
 - The Flask API will be available at its configured port `http://localhost:3001`
-
----
-
-## Features
-
-- Implemented secure authentication with **JWT** and **Bcrypt**, and **smtplib** for automated password recovery.
-- Integrated a Flask REST API with third-party services (**swapi.tech**), optimizing database query performance.
-- Managed persistent state and `localStorage` for user favorites and sessions.
-- Developed a fully responsive interface with **React** and **Bootstrap**, ensuring consistent UX across devices.
 
 ---
 
