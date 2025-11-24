@@ -1,13 +1,8 @@
 import {
-  createHashRouter,
-  createRoutesFromElements,
-  Route,
-} from "react-router-dom";
-/* import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
-} from "react-router-dom"; */
+} from "react-router-dom";
 
 import { Layout } from "./pages/Layout.jsx";
 import { Home } from "./pages/Home.jsx";
@@ -26,8 +21,7 @@ import { StarshipDetails } from "./pages/StarshipDetails.jsx";
 
 <Route path="/settings" element={<Settings />} />
 
-// createHashRouter instead of createBrowserRouter
-export const router = createHashRouter(
+export const router = createBrowserRouter(
   createRoutesFromElements(
     // CreateRoutesFromElements function allows you to build route elements declaratively.
     // Create your routes here, if you want to keep the Navbar and Footer in all views, add your new routes inside the containing Route.
